@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+tags
+build
+bin
+lib

@@ -1,0 +1,21 @@
+<launch>
+  <arg name="use_fake_faults" default="false" />
+  <!--<arg name="loop_rate" default="1500"/>-->
+  <arg name="loop_rate" default="1000"/>
+
+  <!-- Load ethercat master (synapse) into process -->
+  <include file="$(find synapse)/launch/synapse.launch">
+      <arg name="loop_rate" value="$(arg loop_rate)"/>
+      <arg name="publish_rate" value="$(arg loop_rate)"/>
+  </include>
+
+  <!-- Load high-level control system into process -->
+  <node pkg="nodelet" type="nodelet" name="high_level_system" output="screen"
+    args="load ankle_knee_nodelet/AnkleKneeNodelet synapse_group --no-bond">
+    <param name="use_fake_faults" value="$(arg use_fake_faults)" />
+    <param name="max_num_service_call_threads" type="int" value="1" />
+    <param name="loop_rate" type="double" value="$(arg loop_rate)" />
+    <rosparam file="$(find AnkleKneeNodelet)/config/joint_config.yaml" command="load" />
+  </node>
+
+</launch>

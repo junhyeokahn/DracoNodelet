@@ -1,0 +1,35 @@
+#include <AnkleKneeInterface/AnkleKneeInterface.hpp>
+
+AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
+                                           mInitTime(0.01),
+                                           mServoRate(1.0/1500) {
+
+}
+
+AnkleKneeInterface::~AnkleKneeInterface() {
+
+}
+
+void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
+                                    std::shared_ptr<AnkleKneeCommand> cmd) {
+    if (mTime < mInitTime) {
+        _initialize(data, cmd);
+    } else {
+        _mainTainCurrentPosition(data, cmd);
+    }
+    mTime += mServoRate;
+}
+
+void AnkleKneeInterface::_initialize(std::shared_ptr<AnkleKneeSensorData> data,
+                                     std::shared_ptr<AnkleKneeCommand> cmd) {
+    cmd->jtrq = 0.0;
+    cmd->q = data->q;
+    cmd->qdot = 0.0;
+}
+
+void AnkleKneeInterface::_mainTainCurrentPosition(std::shared_ptr<AnkleKneeSensorData> data,
+                                                  std::shared_ptr<AnkleKneeCommand> cmd) {
+    cmd->jtrq = 0.0;
+    cmd->q = data->q;
+    cmd->qdot = 0.0;
+}

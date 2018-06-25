@@ -1,0 +1,30 @@
+<package>
+  <description brief="ankle_knee_nodelet">
+
+     ankle_knee_nodelet
+
+  </description>
+  <author>hcrl</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/empty_nodelet_controller</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="apptronik_srvs"/>
+  <depend package="apptronik_msgs"/>
+  <depend package="synapse"/>
+  <depend package="apptronik_ros"/>
+  <depend package="apptronik_ros_utils"/>
+  <depend package="apptronik_system"/>
+  <depend package="pluginlib"/>
+  <depend package="nodelet"/>
+  <depend package="AnkleKneeController"/>
+
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+
+</package>
+

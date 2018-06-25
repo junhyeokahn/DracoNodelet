@@ -1,0 +1,10 @@
+<library path="lib/libAnkleKneeNodelet">
+    <class name="ankle_knee_nodelet/AnkleKneeNodelet"
+        type="ankle_knee_nodelet::AnkleKneeNodelet" base_class_type="nodelet::Nodelet">
+  <!--  pkg_name/library_name   namespace::class_name          always_the_same-->
+  <description>
+    ankle knee nodelet
+  </description>
+  </class>
+</library>
+
