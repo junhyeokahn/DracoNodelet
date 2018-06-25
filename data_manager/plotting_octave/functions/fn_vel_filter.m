@@ -1,0 +1,9 @@
+function vel = fn_vel_filter(raw_vel)
+    vel = raw_vel;
+  for i = 4: length(raw_vel)
+     vel(:,i) = 0.4* raw_vel(:, i) + ... 
+                0.25* raw_vel(:, i-1) + ...
+                0.2 * raw_vel(:, i-2) + ...
+                0.15 * raw_vel(:, i-3);
+  end
+end

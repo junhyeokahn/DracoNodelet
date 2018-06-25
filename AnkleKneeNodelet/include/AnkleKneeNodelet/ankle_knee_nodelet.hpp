@@ -57,5 +57,6 @@ namespace ankle_knee_nodelet
     void _CopyData();
     void _CopyCommand();
     void _ClearFaults(std::vector<std::string> slave_names);
+    void _SetSafeCmd();
   };
 }

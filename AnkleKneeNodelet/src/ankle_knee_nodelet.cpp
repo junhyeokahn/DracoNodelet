@@ -24,8 +24,6 @@ namespace ankle_knee_nodelet
       slaveNames.resize(numJoint+1);
       medullaName = "Medulla_V2";
       slaveNames = {"lknee", "lankle", medullaName};
-      //slaveNames = {"lankle", "lknee", medullaName};
-      // slaveNames = {"lankle", "lknee"};
       Interface = std::make_unique<AnkleKneeInterface>();
       //Interface = std::make_unique<AnkleKneeInterface>();
       SensorData = std::make_shared<AnkleKneeSensorData>();
@@ -62,7 +60,7 @@ namespace ankle_knee_nodelet
     ros::NodeHandle nh = getPrivateNodeHandle();
 
     // User calls SystemLoop Constructor:
-    m_sys.reset(new SystemLoop(boost::bind(&AnkleKneeNodelet::loop, this, _1, _2), nh, slaveNames, true));
+    m_sys.reset(new SystemLoop(boost::bind(&AnkleKneeNodelet::loop, this, _1, _2), nh, slaveNames, false));
 
 
     _ClearFaults(slaveNames);
@@ -114,17 +112,27 @@ namespace ankle_knee_nodelet
   {
 
     _CopyData();
-    Interface->getCommand(SensorData, CommandData);
-    _CopyCommand();
 
     if(fault_bitmap.any())
     {
-
+        _SetSafeCmd();
     }
     else
     {
-
+        Interface->getCommand(SensorData, CommandData);
+        _CopyCommand();
     }
+  }
+
+  void AnkleKneeNodelet::_SetSafeCmd() {
+      jPosCmd = SensorData->q;
+      jVelCmd.setZero();
+      jTrqCmd.setZero();
+      for (int i = 0; i < numJoint; ++i) {
+          *(jPosCmdList[i]) = jPosCmd[i];
+          *(jVelCmdList[i]) = jVelCmd[i];
+          *(jTrqCmdList[i]) = jTrqCmd[i];
+      }
   }
 
   void AnkleKneeNodelet::_CopyData() {

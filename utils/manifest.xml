@@ -1,0 +1,16 @@
+<package>
+  <description brief="utils">
+
+     utils
+
+  </description>
+  <author>Apptronik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/utility</url>
+  <depend package="roscpp"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+</package>

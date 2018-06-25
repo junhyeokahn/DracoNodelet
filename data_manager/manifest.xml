@@ -1,0 +1,18 @@
+<package>
+  <description brief="data_manager">
+
+     data_manager
+
+  </description>
+  <author>Apptronik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/data_manager</url>
+  <depend package="utils"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+</package>
+
+

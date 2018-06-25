@@ -28,16 +28,19 @@ public:
     virtual ~AnkleKneeInterface ();
 
     void getCommand(std::shared_ptr<AnkleKneeSensorData> data,
-                    std::shared_ptr<AnkleKneeCommand> & cmd);
+                    std::shared_ptr<AnkleKneeCommand> cmd);
 private:
     double mTime;
     int mCount;
     double mInitTime;
     double mServoRate;
     int mNumJoint;
+    Eigen::Vector2d mInitQ;
 
     void _initialize(std::shared_ptr<AnkleKneeSensorData> data,
-                     std::shared_ptr<AnkleKneeCommand> & cmd);
-    void _mainTainCurrentPosition(std::shared_ptr<AnkleKneeSensorData> data,
+                     std::shared_ptr<AnkleKneeCommand> cmd);
+    void _maintainInitialPosition(std::shared_ptr<AnkleKneeSensorData> data,
                                   std::shared_ptr<AnkleKneeCommand> cmd);
+    void _sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData> data,
+                             std::shared_ptr<AnkleKneeCommand> cmd);
 };

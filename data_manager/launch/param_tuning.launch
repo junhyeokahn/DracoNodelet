@@ -1,0 +1,5 @@
+<launch>
+  <node name="param_tune" pkg="data_manager" type="param" output="screen" clear_params="true">
+    <rosparam file="$(find main)/config/model/openchain_2dof.yaml" command="load" ns="model"/>
+  </node>
+</launch>
