@@ -1,0 +1,5 @@
+sinusoidal:
+  transDur: 1.0
+  mid: [2.1, 1.6]
+  freq: [0.8, 0.8]
+  amp: [0.2, 0.3]

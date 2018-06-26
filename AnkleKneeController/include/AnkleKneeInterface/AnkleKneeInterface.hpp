@@ -43,4 +43,11 @@ private:
                                   std::shared_ptr<AnkleKneeCommand> cmd);
     void _sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData> data,
                              std::shared_ptr<AnkleKneeCommand> cmd);
+
+    Eigen::Vector2d mJPosAct;
+    Eigen::Vector2d mJVelAct;
+    Eigen::Vector2d mJEffAct;
+    Eigen::Vector2d mJPosDes;
+    Eigen::Vector2d mJVelDes;
+    Eigen::Vector2d mJEffDes;
 };

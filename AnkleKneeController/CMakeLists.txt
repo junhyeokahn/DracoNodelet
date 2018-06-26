@@ -14,3 +14,5 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 FILE(GLOB_RECURSE srcs ${PROJECT_SOURCE_DIR}/src/AnkleKneeInterface.cpp)
 
 rosbuild_add_library(AnkleKneeController SHARED ${srcs})
+target_link_libraries(AnkleKneeController data_manager
+                                          utils)

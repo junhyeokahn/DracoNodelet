@@ -16,6 +16,7 @@
     <param name="max_num_service_call_threads" type="int" value="1" />
     <param name="loop_rate" type="double" value="$(arg loop_rate)" />
     <rosparam file="$(find AnkleKneeNodelet)/config/joint_config.yaml" command="load" />
+    <rosparam file="$(find AnkleKneeNodelet)/config/joint_sinusoidal.yaml" command="load" ns="planner"/>
   </node>
 
 </launch>

@@ -12,6 +12,8 @@
   <depend package="apptronik_srvs"/>
   <depend package="apptronik_msgs"/>
   <depend package="std_msgs"/>
+  <depend package="data_manager"/>
+  <depend package="utils"/>
 
   <export>
       <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>

@@ -25,7 +25,6 @@ namespace ankle_knee_nodelet
       medullaName = "Medulla_V2";
       slaveNames = {"lknee", "lankle", medullaName};
       Interface = std::make_unique<AnkleKneeInterface>();
-      //Interface = std::make_unique<AnkleKneeInterface>();
       SensorData = std::make_shared<AnkleKneeSensorData>();
       CommandData = std::make_shared<AnkleKneeCommand>();
 

@@ -1,6 +1,6 @@
 lknee:
-  kp: 30.0
-  kd: 5.0
+  kp: 100.0
+  kd: 4.0
 
 lankle:
   kp: 5.0
