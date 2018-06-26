@@ -9,6 +9,7 @@ fn_add_path('/home/apptronik/ros/DracoNodelet/data_manager/plotting_octave');
 
 time = fn_read_file(path, 'time', 1);
 JPosAct = fn_read_file(path, 'JPosAct', 2);
+KneeMJPos = fn_read_file(path, 'kneeMJPos', 1);
 JVelAct = fn_read_file(path, 'JVelAct', 2);
 JEffAct = fn_read_file(path, 'JEffAct', 2);
 JPosDes = fn_read_file(path, 'JPosDes', 2);
@@ -45,7 +46,10 @@ for i = 1:2
   tmp(i) = subplot(2,1,i);
   hold on
   plot(time(1:endIdx), JPosDes(i,1:endIdx) ,'r-','linewidth',3);
-  plot(time(1:endIdx), JPosAct(i,1:endIdx), 'b--', 'linewidth',3);
+  plot(time(1:endIdx), JPosAct(i,1:endIdx), 'b-', 'linewidth',3);
+  if (i == 1)
+    plot(time(1:endIdx), KneeMJPos(i,1:endIdx) ,'g-','linewidth',3);
+  end
   hold off
 
   set(gca, 'fontsize',12);

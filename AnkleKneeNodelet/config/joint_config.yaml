@@ -1,7 +1,13 @@
 lknee:
-  kp: 100.0
-  kd: 4.0
+  kp: 180.0
+  kd: 13.0
+  ## For gravity compensation test
+  #kp: 0.0
+  #kd: 0.0
 
 lankle:
-  kp: 5.0
-  kd: 0.3
+  kp: 18.0
+  kd: 2.0
+  ## For gravity compensation test
+  #kp: 0.0
+  #kd: 0.0

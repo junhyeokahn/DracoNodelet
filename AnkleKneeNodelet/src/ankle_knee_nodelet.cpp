@@ -45,6 +45,7 @@ namespace ankle_knee_nodelet
         delete jVelCmdList[i];
         delete jTrqCmdList[i];
     }
+    delete kneeMJPos;
   }
 
   // onInit() function should not block. It should initialize and then return.
@@ -59,7 +60,7 @@ namespace ankle_knee_nodelet
     ros::NodeHandle nh = getPrivateNodeHandle();
 
     // User calls SystemLoop Constructor:
-    m_sys.reset(new SystemLoop(boost::bind(&AnkleKneeNodelet::loop, this, _1, _2), nh, slaveNames, false));
+    m_sys.reset(new SystemLoop(boost::bind(&AnkleKneeNodelet::loop, this, _1, _2), nh, slaveNames, true));
 
 
     _ClearFaults(slaveNames);
@@ -70,6 +71,9 @@ namespace ankle_knee_nodelet
     m_sys->setRunMode(JOINT_IMPEDANCE, "lankle");
 
     // User registers a state ptr for each MISO topic with desired state info
+    kneeMJPos = new double(0.);
+    m_sys->registerStatePtr(kneeMJPos, "joint_position2_rad__",
+            slaveNames[0]);
     for (int i = 0; i < numJoint; ++i) {
         jPosList[i] = new double(0.);
         m_sys->registerStatePtr(jPosList[i], "js__joint__position__rad",
@@ -140,6 +144,7 @@ namespace ankle_knee_nodelet
         jVel[i] = *(jVelList[i]);
         jTrq[i] = *(jTrqList[i]);
     }
+    SensorData->kneeMJPos = *(kneeMJPos);
     SensorData->q = jPos;
     SensorData->qdot = jVel;
     SensorData->jtrq = jTrq;

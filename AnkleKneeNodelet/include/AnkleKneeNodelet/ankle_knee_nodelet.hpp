@@ -25,6 +25,7 @@ namespace ankle_knee_nodelet
     Eigen::VectorXd jVel;
     Eigen::VectorXd jTrq;
     std::vector<double*> jPosList;
+    double* kneeMJPos;
     std::vector<double*> jVelList;
     std::vector<double*> jTrqList;
 

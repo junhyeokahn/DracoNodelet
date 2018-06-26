@@ -10,7 +10,6 @@ public:
     Eigen::Vector2d q;
     Eigen::Vector2d qdot;
     Eigen::Vector2d jtrq;
-
 };
 
 class AnkleKneeSensorData
@@ -19,6 +18,7 @@ public:
     Eigen::Vector2d q;
     Eigen::Vector2d qdot;
     Eigen::Vector2d jtrq;
+    double kneeMJPos;
 };
 
 class AnkleKneeInterface
@@ -50,4 +50,10 @@ private:
     Eigen::Vector2d mJPosDes;
     Eigen::Vector2d mJVelDes;
     Eigen::Vector2d mJEffDes;
+    double mKneeMJPos;
+    Eigen::MatrixXd mA;
+    double mMass;
+    double mGrav;
+    double mRx;
+    double mRy;
 };
