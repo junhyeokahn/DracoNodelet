@@ -72,8 +72,8 @@ namespace ankle_knee_nodelet
 
     // User registers a state ptr for each MISO topic with desired state info
     kneeMJPos = new double(0.);
-    m_sys->registerStatePtr(kneeMJPos, "joint_position2_rad__",
-            slaveNames[0]);
+    //m_sys->registerStatePtr(kneeMJPos, "joint_position2_rad__",
+            //slaveNames[0]);
     for (int i = 0; i < numJoint; ++i) {
         jPosList[i] = new double(0.);
         m_sys->registerStatePtr(jPosList[i], "js__joint__position__rad",

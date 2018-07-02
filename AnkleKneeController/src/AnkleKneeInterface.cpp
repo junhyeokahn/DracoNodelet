@@ -76,7 +76,7 @@ void AnkleKneeInterface::_maintainInitialPosition(std::shared_ptr<AnkleKneeSenso
     cmd->q = mInitQ;
     cmd->qdot.setZero();
 
-    cmd->jtrq[0] = (mMass * mGrav * mRx * cos(data->q[0]));
+    cmd->jtrq[0] = (mMass * mGrav * mRx * cos(M_PI - data->q[0]));
     cmd->jtrq[1] = 0.;
     //cmd->jtrq.setZero();
 }
@@ -113,7 +113,7 @@ void AnkleKneeInterface::_sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData
             spline.getCurveDerPoint(mTime - initTime, 2, d_ary);
             for (int i = 0; i < 2; ++i) cmd->jtrq[i] = d_ary[i];
             cmd->jtrq = mA * cmd->jtrq; // feedforword
-            cmd->jtrq[0] = cmd->jtrq[0] + (mMass * mGrav * mRx * cos(data->q[0])); // gravity
+            cmd->jtrq[0] = cmd->jtrq[0] + (mMass * mGrav * mRx * cos(M_PI - data->q[0])); // gravity
             //cmd->jtrq.setZero();
         } else {
             for (int i = 0; i < 2; ++i) {
@@ -125,7 +125,7 @@ void AnkleKneeInterface::_sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData
                     -amp[i]*2*M_PI*freq[i]*2*M_PI*freq[i]*sin(2*M_PI*freq[i]*(mTime - transDur));
             }
             cmd->jtrq = mA*cmd->jtrq; // feedforword
-            cmd->jtrq[0] = cmd->jtrq[0] + (mMass * mGrav * mRx * cos(data->q[0])); // gravity
+            cmd->jtrq[0] = cmd->jtrq[0] + (mMass * mGrav * mRx * cos(M_PI - data->q[0])); // gravity
             //cmd->jtrq.setZero();
         }
     }
