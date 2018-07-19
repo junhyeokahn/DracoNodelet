@@ -21,13 +21,19 @@ namespace ankle_knee_nodelet
 
     // States
     unsigned int m_fault_status;
+    int mControlMode;
     Eigen::VectorXd jPos;
     Eigen::VectorXd jVel;
     Eigen::VectorXd jTrq;
+    Eigen::VectorXd chirp;
+    Eigen::VectorXd chirpInput;
+    Eigen::VectorXd chirpOutput;
     std::vector<double*> jPosList;
-    double* kneeMJPos;
     std::vector<double*> jVelList;
     std::vector<double*> jTrqList;
+    std::vector<double*> chirpList;
+    std::vector<double*> chirpInputList;
+    std::vector<double*> chirpOutputList;
 
     // Commands
     Eigen::VectorXd jTrqCmd;
@@ -55,6 +61,11 @@ namespace ankle_knee_nodelet
                              const std::string & slave_name,
                              const std::string & parameter_name,
                              const std::string & service_name);
+
+    void _CallInt16Service(const ros::NodeHandle & nh,
+                           const std::string & slave_name,
+                           const std::string & parameter_name,
+                           const std::string & service_name);
     void _CopyData();
     void _CopyCommand();
     void _ClearFaults(std::vector<std::string> slave_names);

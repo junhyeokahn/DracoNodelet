@@ -47,9 +47,9 @@ for i = 1:2
   hold on
   plot(time(1:endIdx), JPosDes(i,1:endIdx) ,'r-','linewidth',3);
   plot(time(1:endIdx), JPosAct(i,1:endIdx), 'b-', 'linewidth',3);
-  if (i == 1)
-    plot(time(1:endIdx), KneeMJPos(i,1:endIdx) ,'g-','linewidth',3);
-  end
+%  if (i == 1)
+%    plot(time(1:endIdx), KneeMJPos(i,1:endIdx) ,'g-','linewidth',3);
+%  end
   hold off
 
   set(gca, 'fontsize',12);

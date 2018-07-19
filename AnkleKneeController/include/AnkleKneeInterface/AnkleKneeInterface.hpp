@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <Eigen/Dense>
+#include <vector>
 
 class AnkleKneeCommand
 {
@@ -18,7 +19,9 @@ public:
     Eigen::Vector2d q;
     Eigen::Vector2d qdot;
     Eigen::Vector2d jtrq;
-    double kneeMJPos;
+    Eigen::Vector2d chirp;
+    Eigen::Vector2d chirpInput;
+    Eigen::Vector2d chirpOutput;
 };
 
 class AnkleKneeInterface
@@ -37,12 +40,33 @@ private:
     int mNumJoint;
     Eigen::Vector2d mInitQ;
 
+    //Chirp related
+    double m_high_freq;
+    double m_low_freq;
+    double m_rate;
+    double m_amp;
+    double m_offset;
+    double m_start_dur;
+    double m_end_dur;
+    double m_last_signal;
+    double m_last_velocity;
+    std::vector<double> m_save_input;
+    std::vector<double> m_save_output;
+    std::vector<double> m_save_time;
+    std::vector<double> m_save_command;
+    bool m_is_saved;
+    bool m_is_saved_cmd;
+    bool m_is_current_chirp;
+    int mMode;
+
     void _initialize(std::shared_ptr<AnkleKneeSensorData> data,
                      std::shared_ptr<AnkleKneeCommand> cmd);
     void _maintainInitialPosition(std::shared_ptr<AnkleKneeSensorData> data,
                                   std::shared_ptr<AnkleKneeCommand> cmd);
     void _sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData> data,
                              std::shared_ptr<AnkleKneeCommand> cmd);
+    void _chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
+                      std::shared_ptr<AnkleKneeCommand> cmd);
 
     Eigen::Vector2d mJPosAct;
     Eigen::Vector2d mJVelAct;

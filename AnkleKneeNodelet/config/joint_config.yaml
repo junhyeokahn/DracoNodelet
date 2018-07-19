@@ -1,13 +1,35 @@
 lknee:
-  kp: 180.0
-  kd: 11.0
-  ## For gravity compensation test
-  #kp: 0.0
-  #kd: 0.0
+  joint_kp: 150.0
+  joint_kd: 5.0
+  torque_kp: 2.0
+  torque_kd: 0.01
+  #torque_kp: 0.0
+  #torque_kd: 0.0
+  current_limit: 3.0
+  enable_dob: 0
 
 lankle:
-  kp: 18.0
-  kd: 1.5
-  ## For gravity compensation test
-  #kp: 0.0
-  #kd: 0.0
+  joint_kp: 18.0
+  joint_kd: 1.5
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 3.0
+  enable_dob: 0
+
+rKnee:
+  joint_kp: 150.0
+  joint_kd: 5.0
+  torque_kp: 2.0
+  torque_kd: 0.01
+  #torque_kp: 0.0
+  #torque_kd: 0.0
+  current_limit: 3.0
+  enable_dob: 0
+
+rAnkle:
+  joint_kp: 18.0
+  joint_kd: 1.5
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 0.2
+  enable_dob: 0

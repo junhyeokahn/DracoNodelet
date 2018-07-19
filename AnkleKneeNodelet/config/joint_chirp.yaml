@@ -1,0 +1,15 @@
+chirp:
+  #startDur: 1.0
+  #highFreq: 300
+  #lowFreq: 0.001
+  #rate: 0.015
+  #amp: 1.5
+  #offset: -2.0
+  #endDur: 0.006
+  startDur: 1.0
+  highFreq: 200
+  lowFreq: 0.001
+  rate: 0.015
+  amp: 5.0
+  offset: 375.0
+  endDur: 0.006

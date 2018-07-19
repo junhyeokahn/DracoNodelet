@@ -66,6 +66,15 @@ namespace sejong{
               Eigen::VectorXd & ab);
 
   //jh
+  //
+  void saveVector(const Eigen::VectorXd & vec_,
+          std::string name_,
+          bool b_param = false);
+  void saveVector(double * _vec, std::string _name, int size, bool b_param = false);
+  void saveVector(const std::vector<double> & _vec, std::string _name, bool b_param = false);
+  void cleaningFile(std::string file_name_,
+          std::string & ret_file_,
+          bool b_param);
 }
 
 #endif

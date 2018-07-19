@@ -1,0 +1,8 @@
+Way to calibrate potentiometer(Actuator position)
+1. Go to hard stop, where we know the actuator length.
+2. Open Sensing>>LinearPos.
+3. Set the actuator Position1_m with the known value.
+4. Set Pot_calibration 1 and back to 0.
+5. Move to another known positon (note that this position should be achieved
+   by motor position) and set the Position2_m with it(read UI).
+6. Set Pot_calibration 2 and back to 0
