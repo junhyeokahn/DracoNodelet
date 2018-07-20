@@ -9,4 +9,5 @@ cp ${data_location}/ExperimentData/* ${data_location}/ExperimentDataCheck/
 cp ${data_location}/ExperimentData/* ${target_folder}/${folder_name}/
 rm ${data_location}/ExperimentData/*
 
-#exit 0
+#cd ExperimentDataCheck
+#for data in debug_bus_voltage.txt debug_knee_effort.txt debug_knee_qdot.txt debug_knee_q.txt

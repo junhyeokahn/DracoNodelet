@@ -6,3 +6,19 @@ Way to calibrate potentiometer(Actuator position)
 5. Move to another known positon (note that this position should be achieved
    by motor position) and set the Position2_m with it(read UI).
 6. Set Pot_calibration 2 and back to 0
+
+TODO list
+_make ankle gains 0_
+- get 2 types of joint position
+- without torque feedback, find kp & kd for both collocated, non-collocated
+- sys id for outer mass, outer damping
+- joint position chirp with motor position without trq feedback & try to match
+  with simulation result
+- joint position chirp with joint position without trq feedback & try to match
+  with simulation result
+- joint position chirp with joint position with torque feedback & try to match
+  with simulation result
+
+- script uploading files to google drive
+- joint position chirp code
+- plant bode plot in matlab

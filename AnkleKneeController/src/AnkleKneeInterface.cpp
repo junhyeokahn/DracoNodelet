@@ -9,7 +9,7 @@
 AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
                                            mCount(0),
                                            mInitTime(0.01),
-                                           mServoRate(1.0/1500),
+                                           mServoRate(1.0/1000),
                                            mNumJoint(2),
                                            mGrav(9.81) {
 
@@ -48,9 +48,13 @@ AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
     m_save_input.reserve(5000000);
     m_save_output.reserve(5000000);
     m_save_time.reserve(5000000);
+    m_debug_knee_q.reserve(5000000);
+    m_debug_knee_qdot.reserve(5000000);
+    m_debug_knee_effort.reserve(5000000);
+    m_debug_bus_voltage.reserve(5000000);
     m_is_saved = false;
     m_is_saved_cmd = false;
-    m_is_current_chirp = false;
+    mLinearChirp = 1;
     ParameterFetcher::searchReqParam(nh2, "highFreq", m_high_freq);
     ParameterFetcher::searchReqParam(nh2, "lowFreq", m_low_freq);
     ParameterFetcher::searchReqParam(nh2, "rate", m_rate);
@@ -58,13 +62,9 @@ AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
     ParameterFetcher::searchReqParam(nh2, "offset", m_offset);
     ParameterFetcher::searchReqParam(nh2, "startDur", m_start_dur);
     ParameterFetcher::searchReqParam(nh2, "endDur", m_end_dur);
+    ParameterFetcher::searchReqParam(nh2, "chirpType", mLinearChirp);
     ros::NodeHandle nh3("/high_level_system/env/mode/");
     ParameterFetcher::searchReqParam(nh3, "controlMode", mMode);
-    if (mMode == 1) {
-        m_is_current_chirp = true;
-    } else {
-        m_is_current_chirp = false;
-    }
 }
 
 AnkleKneeInterface::~AnkleKneeInterface() {
@@ -88,6 +88,24 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
     mJPosDes = cmd->q;
     mJVelDes = cmd->qdot;
     mJEffDes = cmd->jtrq;
+
+    // For debugging purpose
+    if (mTime < 30.0) {
+        m_debug_knee_q.push_back(cmd->q[0]);
+        m_debug_knee_qdot.push_back(cmd->qdot[0]);
+        m_debug_knee_effort.push_back(cmd->jtrq[0]);
+        m_debug_bus_voltage.push_back(data->busVoltage[0]);
+    } else {
+        if (!m_is_saved_cmd) {
+            sejong::saveVector(m_debug_knee_q, "debug_knee_q");
+            sejong::saveVector(m_debug_knee_qdot, "debug_knee_qdot");
+            sejong::saveVector(m_debug_knee_effort, "debug_knee_effort");
+            sejong::saveVector(m_debug_bus_voltage, "debug_bus_voltage");
+            m_is_saved_cmd = true;
+            std::cout << "DATA DEBUG IS SAVED!" << std::endl;
+        }
+    }
+
 }
 
 void AnkleKneeInterface::_initialize(std::shared_ptr<AnkleKneeSensorData> data,
@@ -97,13 +115,10 @@ void AnkleKneeInterface::_initialize(std::shared_ptr<AnkleKneeSensorData> data,
         mInitQ = data->q;
         cmd->jtrq.setZero();
         cmd->qdot.setZero();
-        std::cout << "i am 0" << std::endl;
     } else if (mMode == 1) {
         cmd->qdot.setZero();
-        std::cout << "i am 1" << std::endl;
     } else {
         cmd->q = data->chirp;
-        std::cout << "i am 2" << std::endl;
     }
     DataManager::getDataManager()->start();
 }
@@ -133,39 +148,53 @@ void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
         }
         firstSpline.getCurvePoint(mTime - firstSplineInitTime, d_ary);
         signal = d_ary[0];
-        if (m_is_current_chirp) {
+        firstSpline.getCurveDerPoint(mTime - firstSplineInitTime, 1,  d_ary);
+        velocity = d_ary[0];
+        if (mMode == 1) {
             cmd->jtrq[0] = signal;
             cmd->jtrq[1] = 0.;
         } else {
             cmd->q[0] = signal;
             cmd->q[1] = chirpInit[1];
+            cmd->qdot[0] = velocity;
+            cmd->qdot[1] = 0.;
         }
     } else {
-        static double prev_sample_time = 0;
-        static double prev_effective_angle = 0;
-
-        double elapsed_time = mTime - mInitTime - m_start_dur;
         double effective_angle, effective_switching_freq_hz;
-        double range = m_high_freq - m_low_freq;
-        double period = elapsed_time - prev_sample_time;
-        prev_sample_time = elapsed_time;
+        double elapsed_time = mTime - mInitTime - m_start_dur;
+        if (mLinearChirp == 0) {
+            double initial_phase = 0;
+            static double startTime = mTime;
+            static double endTime = mTime + m_high_freq / m_rate;
+            effective_switching_freq_hz = m_low_freq + m_rate * elapsed_time;
+            signal = m_offset + (3 + m_amp*(1 - (mTime-startTime)/endTime)) * sin(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0));
+            velocity = (3 + m_amp*(1 - (mTime-startTime)/endTime)) * cos(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0)) * (2*M_PI*m_low_freq + 2*M_PI*m_rate*elapsed_time);
+        } else {
+            static double prev_sample_time = 0;
+            static double prev_effective_angle = 0;
 
-        //exponential chirp
-        effective_angle = 2 * M_PI * m_low_freq * (pow(m_rate * range, elapsed_time) - 1) / log(m_rate * range);
-        //ROS_INFO("effective_angle:%f\t elapsed_time:%f", effective_angle, elapsed_time);
+            double range = m_high_freq - m_low_freq;
+            double period = elapsed_time - prev_sample_time;
+            prev_sample_time = elapsed_time;
 
-        signal = m_amp * sin(effective_angle) + m_offset;
-        velocity = m_amp * cos(effective_angle) * ((2*M_PI*m_low_freq) / (log(m_rate*range))) * pow(m_rate * range, elapsed_time) * log(m_rate*range);
+            //exponential chirp
+            // rate * range =~ 2.0
+            effective_angle = 2 * M_PI * m_low_freq * (pow(m_rate * range, elapsed_time) - 1) / log(m_rate * range);
+            //ROS_INFO("effective_angle:%f\t elapsed_time:%f", effective_angle, elapsed_time);
 
-        if(period <= 0.0)
-        {
-            effective_switching_freq_hz = 0.0;
+            signal = m_amp * sin(effective_angle) + m_offset;
+            velocity = m_amp * cos(effective_angle) * ((2*M_PI*m_low_freq) / (log(m_rate*range))) * pow(m_rate * range, elapsed_time) * log(m_rate*range);
+
+            if(period <= 0.0)
+            {
+                effective_switching_freq_hz = 0.0;
+            }
+            else
+            {
+                effective_switching_freq_hz = (effective_angle - prev_effective_angle) / period / 2 / M_PI;
+            }
+            prev_effective_angle = effective_angle;
         }
-        else
-        {
-            effective_switching_freq_hz = (effective_angle - prev_effective_angle) / period / 2 / M_PI;
-        }
-        prev_effective_angle = effective_angle;
 
         if(effective_switching_freq_hz > m_high_freq)
         {
@@ -180,16 +209,22 @@ void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
             if (mTime < lastSplineInitTime + m_end_dur) {
                 lastSpline.getCurvePoint(mTime - lastSplineInitTime, d_ary);
                 signal = d_ary[0];
+                lastSpline.getCurveDerPoint(mTime - lastSplineInitTime, 1,  d_ary);
+                velocity = d_ary[0];
             } else {
                 signal = chirpInit[0];
+                velocity = 0.;
             }
         }
-        if (m_is_current_chirp) {
+
+        if (mMode == 1) {
             cmd->jtrq[0] = signal;
             cmd->jtrq[1] = 0.0;
         } else {
             cmd->q[0] = signal;
             cmd->q[1] = chirpInit[1];
+            cmd->qdot[0] = velocity;
+            cmd->qdot[1] = 0.;
         }
 
         m_last_signal = signal;
@@ -198,25 +233,16 @@ void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
         if(effective_switching_freq_hz < m_high_freq ) {
             m_save_input.push_back(data->chirpInput[0]);
             m_save_output.push_back(data->chirpOutput[0]);
-            m_save_time.push_back(mTime);
+            m_save_time.push_back(data->nanosecondKnee);
         } else {
             if (!m_is_saved) {
                 sejong::saveVector(m_save_input, "input");
                 sejong::saveVector(m_save_output, "output");
                 sejong::saveVector(m_save_time, "time");
+                std::cout << "time : " << mTime << std::endl;
                 m_is_saved = true;
                 std::cout << "DATA INPUT OUTPUT IS SAVED!" << std::endl;
             }
-        }
-    }
-    // For debugging purpose
-    if (mTime < 15.0) {
-        m_save_command.push_back(signal);
-    } else {
-        if (!m_is_saved_cmd) {
-            sejong::saveVector(m_save_command, "command");
-            m_is_saved_cmd = true;
-            std::cout << "DATA CMD IS SAVED!" << std::endl;
         }
     }
 }

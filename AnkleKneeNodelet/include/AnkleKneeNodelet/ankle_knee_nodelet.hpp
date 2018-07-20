@@ -22,18 +22,23 @@ namespace ankle_knee_nodelet
     // States
     unsigned int m_fault_status;
     int mControlMode;
+    int mJPosFeedbackSrc;
     Eigen::VectorXd jPos;
     Eigen::VectorXd jVel;
     Eigen::VectorXd jTrq;
     Eigen::VectorXd chirp;
     Eigen::VectorXd chirpInput;
     Eigen::VectorXd chirpOutput;
+    Eigen::VectorXd busVoltage;
+
     std::vector<double*> jPosList;
     std::vector<double*> jVelList;
     std::vector<double*> jTrqList;
     std::vector<double*> chirpList;
     std::vector<double*> chirpInputList;
     std::vector<double*> chirpOutputList;
+    std::vector<unsigned int*> nanosecondList;
+    std::vector<double*> busVoltageList;
 
     // Commands
     Eigen::VectorXd jTrqCmd;

@@ -13,12 +13,15 @@ namespace ankle_knee_nodelet
       chirp = Eigen::VectorXd::Zero(numJoint);
       chirpInput = Eigen::VectorXd::Zero(numJoint);
       chirpOutput = Eigen::VectorXd::Zero(numJoint);
+      busVoltage= Eigen::VectorXd::Zero(numJoint);
       jPosList.resize(numJoint);
       jVelList.resize(numJoint);
       jTrqList.resize(numJoint);
       chirpList.resize(numJoint);
       chirpInputList.resize(numJoint);
       chirpOutputList.resize(numJoint);
+      nanosecondList.resize(numJoint);
+      busVoltageList.resize(numJoint);
       jPosCmd = Eigen::VectorXd::Zero(numJoint);
       jVelCmd = Eigen::VectorXd::Zero(numJoint);
       jTrqCmd = Eigen::VectorXd::Zero(numJoint);
@@ -49,6 +52,8 @@ namespace ankle_knee_nodelet
         delete chirpList[i];
         delete chirpInputList[i];
         delete chirpOutputList[i];
+        delete busVoltageList[i];
+        delete nanosecondList[i];
         delete jPosCmdList[i];
         delete jVelCmdList[i];
         delete jTrqCmdList[i];
@@ -66,6 +71,7 @@ namespace ankle_knee_nodelet
   {
     ros::NodeHandle nh = getPrivateNodeHandle();
     nh.param("env/mode/controlMode", mControlMode, 0);
+    nh.param("env/mode/jPosFeedbackSrc", mJPosFeedbackSrc, 0);
 
     // User calls SystemLoop Constructor:
     m_sys.reset(new SystemLoop(boost::bind(&AnkleKneeNodelet::loop, this, _1, _2), nh, slaveNames, true));
@@ -97,11 +103,33 @@ namespace ankle_knee_nodelet
         jTrqList[i] = new double(0.);
         m_sys->registerStatePtr(jTrqList[i], "js__joint__effort__Nm",
                 slaveNames[i]);
+        nanosecondList[i] = new unsigned int(0);
+        m_sys->registerStatePtr(nanosecondList[i], "timestamp__ns",
+                slaveNames[i]);
+        busVoltageList[i] = new double(0.);
+        m_sys->registerStatePtr(busVoltageList[i], "energetics__bus_voltage__V",
+                slaveNames[i]);
         if (mControlMode == 0) {
             chirpList[i] = new double(0.);
+            m_sys->registerStatePtr(chirpList[i], "js__joint__position__rad",
+                    slaveNames[i]);
             chirpInputList[i] = new double(0.);
-            chirpOutputList[i] = new double(0.);
-            //TODO
+            m_sys->registerStatePtr(chirpInputList[i], "mirrored__joint__position__cmd",
+                    slaveNames[i]);
+            if (mJPosFeedbackSrc == 0) {
+                chirpOutputList[i] = new double(0.);
+                if (i == 0) {
+                    m_sys->registerStatePtr(chirpOutputList[i], "joint__position__with__spring__rad",
+                            slaveNames[i]);
+                } else {
+                    m_sys->registerStatePtr(chirpOutputList[i], "js__joint__position__rad",
+                            slaveNames[i]);
+                }
+            } else {
+                chirpOutputList[i] = new double(0.);
+                m_sys->registerStatePtr(chirpOutputList[i], "js__joint__position__rad",
+                        slaveNames[i]);
+            }
         } else if (mControlMode == 1) {
             chirpList[i] = new double(0.);
             m_sys->registerStatePtr(chirpList[i], "motor__current__A",
@@ -162,6 +190,16 @@ namespace ankle_knee_nodelet
         _CallInt16Service(nh, slaveNames[i], "enable_dob","/Control__Actuator__Effort__EN_DOB/set");
     }
 
+    // Set JPos Sensing
+    int value(0);
+    if (mJPosFeedbackSrc == 0) { value = 2; }
+    else { value = 1; }
+    apptronik_srvs::UInt16 srv_int;
+    srv_int.request.set_data = value;
+    if(ros::service::exists("/rKnee/Sensing__LinearPos__Feedback_Source/set", false)) {
+        ros::service::call("/rKnee/Sensing__LinearPos__Feedback_Source/set", srv_int);
+    }
+
     // Must call start to start loop
     m_sys->start();
   }
@@ -203,6 +241,7 @@ namespace ankle_knee_nodelet
         chirp[i] = *(chirpList[i]);
         chirpInput[i] = *(chirpInputList[i]);
         chirpOutput[i] = *(chirpOutputList[i]);
+        busVoltage[i] = *(busVoltageList[i]);
     }
     SensorData->q = jPos;
     SensorData->qdot = jVel;
@@ -210,6 +249,9 @@ namespace ankle_knee_nodelet
     SensorData->chirp = chirp;
     SensorData->chirpInput = chirpInput;
     SensorData->chirpOutput = chirpOutput;
+    SensorData->nanosecondKnee = *(nanosecondList[0]);
+    SensorData->nanosecondAnkle = *(nanosecondList[1]);
+    SensorData->busVoltage = busVoltage;
   }
 
   void AnkleKneeNodelet::_CopyCommand() {

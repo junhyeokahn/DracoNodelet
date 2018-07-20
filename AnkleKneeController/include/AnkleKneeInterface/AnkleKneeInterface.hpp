@@ -22,6 +22,9 @@ public:
     Eigen::Vector2d chirp;
     Eigen::Vector2d chirpInput;
     Eigen::Vector2d chirpOutput;
+    Eigen::Vector2d busVoltage;
+    unsigned int nanosecondKnee;
+    unsigned int nanosecondAnkle;
 };
 
 class AnkleKneeInterface
@@ -53,11 +56,14 @@ private:
     std::vector<double> m_save_input;
     std::vector<double> m_save_output;
     std::vector<double> m_save_time;
-    std::vector<double> m_save_command;
+    std::vector<double> m_debug_knee_q;
+    std::vector<double> m_debug_knee_qdot;
+    std::vector<double> m_debug_knee_effort;
+    std::vector<double> m_debug_bus_voltage;
     bool m_is_saved;
     bool m_is_saved_cmd;
-    bool m_is_current_chirp;
-    int mMode;
+    int mMode; // 0 : joint impedance, 1 : currrent, 2: motor pos
+    int mLinearChirp;
 
     void _initialize(std::shared_ptr<AnkleKneeSensorData> data,
                      std::shared_ptr<AnkleKneeCommand> cmd);
