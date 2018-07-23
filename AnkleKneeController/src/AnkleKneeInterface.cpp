@@ -48,6 +48,7 @@ AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
     m_save_input.reserve(5000000);
     m_save_output.reserve(5000000);
     m_save_time.reserve(5000000);
+    m_save_temp.reserve(5000000);
     m_debug_knee_q.reserve(5000000);
     m_debug_knee_qdot.reserve(5000000);
     m_debug_knee_effort.reserve(5000000);
@@ -79,6 +80,7 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
         //_maintainInitialPosition(data, cmd);
         //_sinusoidalPosition(data, cmd);
         _chirpSignal(data, cmd);
+        //_stepSignal(data, cmd);
     }
     mTime += mServoRate;
     mCount += 1;
@@ -90,7 +92,7 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
     mJEffDes = cmd->jtrq;
 
     // For debugging purpose
-    if (mTime < 30.0) {
+    if (mTime < 15.0) {
         m_debug_knee_q.push_back(cmd->q[0]);
         m_debug_knee_qdot.push_back(cmd->qdot[0]);
         m_debug_knee_effort.push_back(cmd->jtrq[0]);
@@ -121,6 +123,20 @@ void AnkleKneeInterface::_initialize(std::shared_ptr<AnkleKneeSensorData> data,
         cmd->q = data->chirp;
     }
     DataManager::getDataManager()->start();
+}
+
+void AnkleKneeInterface::_stepSignal(std::shared_ptr<AnkleKneeSensorData> data,
+                                     std::shared_ptr<AnkleKneeCommand> cmd) {
+    static double startTime(mTime);
+    if (mTime > startTime + 3.0) {
+        cmd->q[0] = 0.3 + 1.0;
+        cmd->q[1] = mInitQ[1];
+    } else {
+        cmd->q[0] = 1.0;
+        cmd->q[1] = mInitQ[2];
+    }
+    cmd->qdot.setZero();
+    cmd->jtrq.setZero();
 }
 
 void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
@@ -162,13 +178,15 @@ void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
     } else {
         double effective_angle, effective_switching_freq_hz;
         double elapsed_time = mTime - mInitTime - m_start_dur;
+        double minamp = 0.05;
         if (mLinearChirp == 0) {
             double initial_phase = 0;
             static double startTime = mTime;
             static double endTime = mTime + m_high_freq / m_rate;
             effective_switching_freq_hz = m_low_freq + m_rate * elapsed_time;
-            signal = m_offset + (3 + m_amp*(1 - (mTime-startTime)/endTime)) * sin(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0));
-            velocity = (3 + m_amp*(1 - (mTime-startTime)/endTime)) * cos(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0)) * (2*M_PI*m_low_freq + 2*M_PI*m_rate*elapsed_time);
+            signal = m_offset + (-m_amp/(endTime - startTime)*(mTime - startTime) + minamp + m_amp ) * sin(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0));
+            velocity = (-m_amp/(endTime - startTime)*(mTime - startTime) + minamp + m_amp ) * cos(initial_phase + 2 * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0)) * (2*M_PI*m_low_freq + 2*M_PI*m_rate*elapsed_time) +
+                (-m_amp / (endTime - startTime)) * sin(initial_phase + minamp * M_PI * (m_low_freq * elapsed_time + m_rate * elapsed_time * elapsed_time / 2.0));
         } else {
             static double prev_sample_time = 0;
             static double prev_effective_angle = 0;
@@ -234,11 +252,13 @@ void AnkleKneeInterface::_chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
             m_save_input.push_back(data->chirpInput[0]);
             m_save_output.push_back(data->chirpOutput[0]);
             m_save_time.push_back(data->nanosecondKnee);
+            m_save_temp.push_back(data->coreTemp[0]);
         } else {
             if (!m_is_saved) {
                 sejong::saveVector(m_save_input, "input");
                 sejong::saveVector(m_save_output, "output");
                 sejong::saveVector(m_save_time, "time");
+                sejong::saveVector(m_save_temp, "temperature");
                 std::cout << "time : " << mTime << std::endl;
                 m_is_saved = true;
                 std::cout << "DATA INPUT OUTPUT IS SAVED!" << std::endl;

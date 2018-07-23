@@ -7,6 +7,8 @@ lknee:
   #torque_kd: 0.0
   current_limit: 3.0
   enable_dob: 0
+  enable_spring: 0
+  jPosFeedbackSrc: 2 #2: motor position feedback, 1: joint position feedback
 
 lankle:
   joint_kp: 18.0
@@ -15,16 +17,22 @@ lankle:
   torque_kd: 0.0
   current_limit: 3.0
   enable_dob: 0
+  enable_spring: 0
+  jPosFeedbackSrc: 2 #2: motor position feedback, 1: joint position feedback
 
 rKnee:
-  joint_kp: 150.0
-  joint_kd: 5.0
+  joint_kp: 100.0
+  joint_kd: 10.0
+  #joint_kp: 30.0
+  #joint_kd: 4.0
   #torque_kp: 2.0
   #torque_kd: 0.01
   torque_kp: 0.0
   torque_kd: 0.0
   current_limit: 6.0
   enable_dob: 0
+  enable_spring: 0
+  jPosFeedbackSrc: 2 #2: motor position feedback, 1: joint position feedback
 
 rAnkle:
   #joint_kp: 18.0
@@ -35,3 +43,5 @@ rAnkle:
   torque_kd: 0.0
   current_limit: 0.1
   enable_dob: 0
+  enable_spring: 0
+  jPosFeedbackSrc: 2 #2: motor position feedback, 1: joint position feedback

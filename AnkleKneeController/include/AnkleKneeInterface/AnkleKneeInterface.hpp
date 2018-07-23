@@ -23,6 +23,7 @@ public:
     Eigen::Vector2d chirpInput;
     Eigen::Vector2d chirpOutput;
     Eigen::Vector2d busVoltage;
+    Eigen::Vector2d coreTemp;
     unsigned int nanosecondKnee;
     unsigned int nanosecondAnkle;
 };
@@ -56,6 +57,7 @@ private:
     std::vector<double> m_save_input;
     std::vector<double> m_save_output;
     std::vector<double> m_save_time;
+    std::vector<double> m_save_temp;
     std::vector<double> m_debug_knee_q;
     std::vector<double> m_debug_knee_qdot;
     std::vector<double> m_debug_knee_effort;
@@ -73,6 +75,8 @@ private:
                              std::shared_ptr<AnkleKneeCommand> cmd);
     void _chirpSignal(std::shared_ptr<AnkleKneeSensorData> data,
                       std::shared_ptr<AnkleKneeCommand> cmd);
+    void _stepSignal(std::shared_ptr<AnkleKneeSensorData> data,
+                     std::shared_ptr<AnkleKneeCommand> cmd);
 
     Eigen::Vector2d mJPosAct;
     Eigen::Vector2d mJVelAct;
@@ -80,7 +84,6 @@ private:
     Eigen::Vector2d mJPosDes;
     Eigen::Vector2d mJVelDes;
     Eigen::Vector2d mJEffDes;
-    double mKneeMJPos;
     Eigen::MatrixXd mA;
     double mMass;
     double mGrav;
