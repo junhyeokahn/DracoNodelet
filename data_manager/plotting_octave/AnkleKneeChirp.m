@@ -13,10 +13,14 @@ output = fn_read_file(path, 'output', 1);
 debug_q = fn_read_file(path, 'debug_knee_q', 1);
 debug_qdot = fn_read_file(path, 'debug_knee_qdot', 1);
 debug_effort = fn_read_file(path, 'debug_knee_effort', 1);
+temperature = fn_read_file(path, 'temperature', 1);
+
 figure
 plot(input)
 figure
 plot(output)
+figure
+plot(temperature)
 figure
 plot(debug_q)
 figure

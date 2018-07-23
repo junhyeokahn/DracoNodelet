@@ -34,3 +34,7 @@ tags
 build
 bin
 lib
+
+ExperimentData
+ExperimentDataCheck
+octave-workspace

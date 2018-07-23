@@ -9,7 +9,6 @@ fn_add_path('/home/apptronik/ros/DracoNodelet/data_manager/plotting_octave');
 
 time = fn_read_file(path, 'time', 1);
 JPosAct = fn_read_file(path, 'JPosAct', 2);
-KneeMJPos = fn_read_file(path, 'kneeMJPos', 1);
 JVelAct = fn_read_file(path, 'JVelAct', 2);
 JEffAct = fn_read_file(path, 'JEffAct', 2);
 JPosDes = fn_read_file(path, 'JPosDes', 2);
