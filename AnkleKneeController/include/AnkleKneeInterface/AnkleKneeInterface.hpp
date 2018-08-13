@@ -23,6 +23,7 @@ public:
     Eigen::Vector2d chirpInput;
     Eigen::Vector2d chirpOutput;
     Eigen::Vector2d busVoltage;
+    Eigen::Vector2d currentMsr;
     Eigen::Vector2d coreTemp;
     unsigned int nanosecondKnee;
     unsigned int nanosecondAnkle;
@@ -62,6 +63,7 @@ private:
     std::vector<double> m_debug_knee_qdot;
     std::vector<double> m_debug_knee_effort;
     std::vector<double> m_debug_bus_voltage;
+    std::vector<double> m_debug_currentMsr;
     bool m_is_saved;
     bool m_is_saved_cmd;
     int mMode; // 0 : joint impedance, 1 : currrent, 2: motor pos
@@ -77,6 +79,8 @@ private:
                       std::shared_ptr<AnkleKneeCommand> cmd);
     void _stepSignal(std::shared_ptr<AnkleKneeSensorData> data,
                      std::shared_ptr<AnkleKneeCommand> cmd);
+    void _bangControl(std::shared_ptr<AnkleKneeSensorData> data,
+                      std::shared_ptr<AnkleKneeCommand> cmd);
 
     Eigen::Vector2d mJPosAct;
     Eigen::Vector2d mJVelAct;

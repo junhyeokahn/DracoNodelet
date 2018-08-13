@@ -14,6 +14,7 @@ namespace ankle_knee_nodelet
       chirpInput = Eigen::VectorXd::Zero(numJoint);
       chirpOutput = Eigen::VectorXd::Zero(numJoint);
       busVoltage= Eigen::VectorXd::Zero(numJoint);
+      currentMsr = Eigen::VectorXd::Zero(numJoint);
       coreTemp = Eigen::VectorXd::Zero(numJoint);
       jPosList.resize(numJoint);
       jVelList.resize(numJoint);
@@ -23,6 +24,7 @@ namespace ankle_knee_nodelet
       chirpOutputList.resize(numJoint);
       nanosecondList.resize(numJoint);
       busVoltageList.resize(numJoint);
+      currentMsrList.resize(numJoint);
       coreTempList.resize(numJoint);
       jPosCmd = Eigen::VectorXd::Zero(numJoint);
       jVelCmd = Eigen::VectorXd::Zero(numJoint);
@@ -55,6 +57,7 @@ namespace ankle_knee_nodelet
         delete chirpInputList[i];
         delete chirpOutputList[i];
         delete busVoltageList[i];
+        delete currentMsrList[i];
         delete nanosecondList[i];
         delete jPosCmdList[i];
         delete jVelCmdList[i];
@@ -114,6 +117,9 @@ namespace ankle_knee_nodelet
                 slaveNames[i]);
         coreTempList[i] = new double(0.);
         m_sys->registerStatePtr(coreTempList[i], "motor__core_temp_est__C",
+                slaveNames[i]);
+        currentMsrList[i] = new double(0.);
+        m_sys->registerStatePtr(currentMsrList[i], "motor__current__A",
                 slaveNames[i]);
         if (mControlMode == 0) {
             chirpList[i] = new double(0.);
@@ -208,6 +214,8 @@ namespace ankle_knee_nodelet
   {
 
     _CopyData();
+        //Interface->getCommand(SensorData, CommandData);
+        //_CopyCommand();
 
     if(fault_bitmap.any())
     {
@@ -241,6 +249,7 @@ namespace ankle_knee_nodelet
         chirpOutput[i] = *(chirpOutputList[i]);
         busVoltage[i] = *(busVoltageList[i]);
         coreTemp[i] = *(coreTempList[i]);
+        currentMsr[i] = *(currentMsrList[i]);
     }
     SensorData->q = jPos;
     SensorData->qdot = jVel;
@@ -252,6 +261,7 @@ namespace ankle_knee_nodelet
     SensorData->nanosecondAnkle = *(nanosecondList[1]);
     SensorData->busVoltage = busVoltage;
     SensorData->coreTemp = coreTemp;
+    SensorData->currentMsr = currentMsr;
   }
 
   void AnkleKneeNodelet::_CopyCommand() {

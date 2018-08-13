@@ -1,0 +1,24 @@
+<package>
+  <description brief="HipController">
+
+     HipController
+
+  </description>
+  <author>Apptronik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/HipController</url>
+  <depend package="roscpp"/>
+  <depend package="apptronik_srvs"/>
+  <depend package="apptronik_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="data_manager"/>
+  <depend package="utils"/>
+
+  <export>
+      <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+
+</package>
+
+

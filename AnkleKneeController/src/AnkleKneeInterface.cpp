@@ -53,6 +53,7 @@ AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
     m_debug_knee_qdot.reserve(5000000);
     m_debug_knee_effort.reserve(5000000);
     m_debug_bus_voltage.reserve(5000000);
+    m_debug_currentMsr.reserve(5000000);
     m_is_saved = false;
     m_is_saved_cmd = false;
     mLinearChirp = 1;
@@ -79,8 +80,9 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
     } else {
         //_maintainInitialPosition(data, cmd);
         //_sinusoidalPosition(data, cmd);
-        _chirpSignal(data, cmd);
+        //_chirpSignal(data, cmd);
         //_stepSignal(data, cmd);
+        _bangControl(data, cmd);
     }
     mTime += mServoRate;
     mCount += 1;
@@ -92,17 +94,19 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
     mJEffDes = cmd->jtrq;
 
     // For debugging purpose
-    if (mTime < 15.0) {
+    if (mTime < 25.0) {
         m_debug_knee_q.push_back(cmd->q[0]);
         m_debug_knee_qdot.push_back(cmd->qdot[0]);
         m_debug_knee_effort.push_back(cmd->jtrq[0]);
         m_debug_bus_voltage.push_back(data->busVoltage[0]);
+        m_debug_currentMsr.push_back(data->currentMsr[0]);
     } else {
         if (!m_is_saved_cmd) {
             sejong::saveVector(m_debug_knee_q, "debug_knee_q");
             sejong::saveVector(m_debug_knee_qdot, "debug_knee_qdot");
             sejong::saveVector(m_debug_knee_effort, "debug_knee_effort");
             sejong::saveVector(m_debug_bus_voltage, "debug_bus_voltage");
+            sejong::saveVector(m_debug_currentMsr, "debug_current_msr");
             m_is_saved_cmd = true;
             std::cout << "DATA DEBUG IS SAVED!" << std::endl;
         }
@@ -275,6 +279,15 @@ void AnkleKneeInterface::_maintainInitialPosition(std::shared_ptr<AnkleKneeSenso
     cmd->jtrq[0] = (mMass * mGrav * mRx * cos(M_PI - data->q[0]));
     cmd->jtrq[1] = 0.;
     //cmd->jtrq.setZero();
+}
+
+void AnkleKneeInterface::_bangControl(std::shared_ptr<AnkleKneeSensorData> data,
+                                      std::shared_ptr<AnkleKneeCommand> cmd) {
+    Eigen::VectorXd offset(2);
+    offset << 0.3, 0.3; 
+    cmd->q = mInitQ + offset;
+    cmd->qdot.setZero();
+    cmd->jtrq.setZero();
 }
 
 void AnkleKneeInterface::_sinusoidalPosition(std::shared_ptr<AnkleKneeSensorData> data,

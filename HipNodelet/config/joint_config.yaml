@@ -1,0 +1,47 @@
+rHipFlexion:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rHipAbduction:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rHipRotation:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lHipFlexion:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lHipAbduction:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lHipRotation:
+  joint_kp: 0.0
+  joint_kd: 5.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0

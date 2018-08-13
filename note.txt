@@ -9,7 +9,6 @@ Way to calibrate potentiometer(Actuator position)
 
 TODO list
 _make ankle gains 0_
-- get 2 types of joint position
 - without torque feedback, find kp & kd for both collocated, non-collocated
 - sys id for outer mass, outer damping
 - joint position chirp with motor position without trq feedback & try to match
@@ -18,7 +17,19 @@ _make ankle gains 0_
   with simulation result
 - joint position chirp with joint position with torque feedback & try to match
   with simulation result
+- step for each
+- spring inclusion
 
-- script uploading files to google drive
-- joint position chirp code
-- plant bode plot in matlab
+_Find Kd not destabilizing the motor around q = 1.0_
+_Then find Kp for critical damped system_
+|------------------------------+------+------+------+-------|
+| Controller                   | J Kp | J Kd | T Kp | T Kd  |
+|==============================+======+======+======+=======|
+| Non Collocated               | 30   | 4    | 0    | 0     |
+|------------------------------+------+------+------+-------|
+| Collocated with Spring       | 100  | 10   | 0    | 0     |
+|------------------------------+------+------+------+-------|
+| Collocated with Spring & trq | 100  | 10   | 0.01    | 0.001 |
+|------------------------------+------+------+------+-------|
+| Collocated                   | 100  | 10   | 0    | 0     |
+|------------------------------+------+------+------+-------|

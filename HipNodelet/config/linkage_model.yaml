@@ -1,0 +1,29 @@
+rHipFlexion:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0
+
+rHipAbduction:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0
+
+rHipRotation:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0
+
+lHipFlexion:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0
+
+lHipAbduction:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0
+
+lHipRotation:
+  mass: 1.0
+  rx: 0.275
+  ry: 0.0

@@ -1,0 +1,9 @@
+<library path="lib/libHipNodelet">
+    <class name="hip_nodelet/HipNodelet"
+        type="hip_nodelet::HipNodelet" base_class_type="nodelet::Nodelet">
+  <!--  pkg_name/library_name   namespace::class_name          always_the_same-->
+  <description>
+    hip nodelet
+  </description>
+  </class>
+</library>
