@@ -37,9 +37,15 @@ def readData(fileName_, dim_):
     return ret
 
 def preprocess(theta, trq):
-    # range we want
-    # non static movement
-    return theta, trq
+    theta_interested = np.concatenate([theta[1000:2500], theta[4600: 5800],
+                                       theta[7800:8800], theta[11000:11800],
+                                       theta[13500: 14500], theta[16000: 17500],
+                                       theta[22000: 28000]])
+    trq_interested = np.concatenate([trq[1000:2500], trq[4600: 5800],
+                                     trq[7800:8800], trq[11000:11800],
+                                     trq[13500: 14500], trq[16000: 17500],
+                                     trq[22000: 28000]])
+    return theta_interested, trq_interested
 
 def learn(args, _theta, _trq):
     theta = tf.placeholder("float")
@@ -54,8 +60,8 @@ def learn(args, _theta, _trq):
     with tf.Session() as sess:
         sess.run(init)
         for epoch in range(args.num_epoch):
-            __import__('ipdb').set_trace()
-            sess.run(optimizer, feed_dict={theta: _theta, trq: _trq})
+            for (elem_theta, elem_trq) in zip(_theta, _trq):
+                sess.run(optimizer, feed_dict={theta: elem_theta, trq: elem_trq})
 
             if (epoch+1) % 50 == 0:
                 c = sess.run(cost, feed_dict={theta: _theta, trq: _trq})
@@ -74,8 +80,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="data")
-    parser.add_argument("--learning_rate", type=float, default=0.01)
-    parser.add_argument("--num_epoch", type=int, default=1000)
+    parser.add_argument("--learning_rate", type=float, default=0.0001)
+    parser.add_argument("--num_epoch", type=int, default=10)
     args = parser.parse_args()
 
     theta = readData(args.data_dir+"/massID_theta.txt", 1)
