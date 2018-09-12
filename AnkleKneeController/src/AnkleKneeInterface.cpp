@@ -67,6 +67,11 @@ AnkleKneeInterface::AnkleKneeInterface() : mTime(0.0),
     ParameterFetcher::searchReqParam(nh2, "chirpType", mLinearChirp);
     ros::NodeHandle nh3("/high_level_system/env/mode/");
     ParameterFetcher::searchReqParam(nh3, "controlMode", mMode);
+
+    mThetaBin.reserve(5000000);
+    mCmdThetaBin.reserve(5000000);
+    mTrqBin.reserve(5000000);
+    mCmdTrqBin.reserve(5000000);
 }
 
 AnkleKneeInterface::~AnkleKneeInterface() {
@@ -82,7 +87,8 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
         //_sinusoidalPosition(data, cmd);
         //_chirpSignal(data, cmd);
         //_stepSignal(data, cmd);
-        _bangControl(data, cmd);
+        //_bangControl(data, cmd);
+        _massID(data, cmd);
     }
     mTime += mServoRate;
     mCount += 1;
@@ -112,6 +118,51 @@ void AnkleKneeInterface::getCommand(std::shared_ptr<AnkleKneeSensorData> data,
         }
     }
 
+}
+
+void AnkleKneeInterface::_massID(std::shared_ptr<AnkleKneeSensorData> data,
+                                 std::shared_ptr<AnkleKneeCommand> cmd) {
+    double q_offset(0.1);
+    double time_offset(3.0);
+    static int idx(1);
+    int data_collection_number(6);
+    static Eigen::Vector2d last_cmd;
+
+    if (mTime < time_offset * idx) {
+        cmd->q[0] = 1.3 - q_offset*idx;
+    } else {
+        if (data_collection_number > idx) {
+        ++idx;
+        last_cmd << cmd->q[0], mInitQ[1];
+        } else {
+            cmd->q = last_cmd;
+        }
+    }
+
+    cmd->q[1] = mInitQ[1];
+    cmd->qdot.setZero();
+    cmd->jtrq.setZero();
+    cmd->jtrq[0] = (mMass * mGrav * mRx * cos(M_PI - data->q[0]));
+
+    //double threshold(0.001);
+    //if (data->qdot[0] < threshold) {
+        //mCmdThetaBin.push_back(cmd->q[0]);
+        //mThetaBin.push_back(data->q[0]);
+        //mTrqBin.push_back(data->jtrq[0]);
+    //}
+    mCmdThetaBin.push_back(cmd->q[0]);
+    mThetaBin.push_back(data->q[0]);
+    mTrqBin.push_back(data->jtrq[0]);
+
+    static bool isSaved(false);
+    if (mTime > 30 && !isSaved) {
+        sejong::saveVector(mCmdThetaBin, "massID_cmd_theta");
+        sejong::saveVector(mThetaBin, "massID_theta");
+        sejong::saveVector(mTrqBin, "massID_torque");
+        sejong::saveVector(mCmdTrqBin, "massID_cmd_torque");
+        isSaved = true;
+        std::cout << "saved" << std::endl;
+    }
 }
 
 void AnkleKneeInterface::_initialize(std::shared_ptr<AnkleKneeSensorData> data,

@@ -77,11 +77,15 @@ xlabel('Time (sec)','fontsize', 12);
 
 # jtrq
 figure(fig(3))
+trq_estimation = 3.7*9.81*0.275*cos(JPosAct(1,:));
 for i = 1:2
   tmp(i) = subplot(2,1,i);
   hold on
-  plot(time(1:endIdx), JEffDes(i,1:endIdx), 'r-', 'linewidth',3);
+  plot(time(1:endIdx), -JEffDes(i,1:endIdx), 'r-', 'linewidth',3);
   plot(time(1:endIdx), JEffAct(i,1:endIdx), 'b-', 'linewidth', 3);
+  if i == 1
+    plot(time(1:endIdx), trq_estimation(1, 1:endIdx), 'g-', 'linewidth', 3);
+  end
   hold off
 
   set(gca, 'fontsize',12);

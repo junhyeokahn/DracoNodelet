@@ -7,18 +7,17 @@ Way to calibrate potentiometer(Actuator position)
    by motor position) and set the Position2_m with it(read UI).
 6. Set Pot_calibration 2 and back to 0
 
-TODO list
-_make ankle gains 0_
-- without torque feedback, find kp & kd for both collocated, non-collocated
-- sys id for outer mass, outer damping
-- joint position chirp with motor position without trq feedback & try to match
-  with simulation result
-- joint position chirp with joint position without trq feedback & try to match
-  with simulation result
-- joint position chirp with joint position with torque feedback & try to match
-  with simulation result
-- step for each
-- spring inclusion
+Way to start running synapse and embedded code
+1. Pull the latest apptronik_ros and apptronik_embedded
+2. In CCS, import bootloader, medulla_v2_generic, axon_v2 as a project
+3. Compile the projects. For the case of Axon, choose proper option
+4. Load bootloader on medulla and axons
+5. In ~/ros/apptronik_embedded/generic_eeprom, run binary in order of
+   install_siitool, generate_binary, load_eeprom
+6. Using the hex file generated,
+   rosrun application_loader application_loader ~.hex 2,3,4,5,6 1
+   Note that the command should be typed in 5 secs after you turn on.
+7. roslaunch synapse compatibility.launch in order to use UI
 
 _Find Kd not destabilizing the motor around q = 1.0_
 _Then find Kp for critical damped system_
@@ -29,7 +28,12 @@ _Then find Kp for critical damped system_
 |------------------------------+------+------+------+-------|
 | Collocated with Spring       | 100  | 10   | 0    | 0     |
 |------------------------------+------+------+------+-------|
-| Collocated with Spring & trq | 100  | 10   | 0.01    | 0.001 |
+| Collocated with Spring & trq | 100  | 10   | 0.01 | 0.001 |
 |------------------------------+------+------+------+-------|
 | Collocated                   | 100  | 10   | 0    | 0     |
 |------------------------------+------+------+------+-------|
+
+Todo List
+1. 
+
+

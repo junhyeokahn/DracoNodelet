@@ -81,6 +81,8 @@ private:
                      std::shared_ptr<AnkleKneeCommand> cmd);
     void _bangControl(std::shared_ptr<AnkleKneeSensorData> data,
                       std::shared_ptr<AnkleKneeCommand> cmd);
+    void _massID(std::shared_ptr<AnkleKneeSensorData> data,
+                 std::shared_ptr<AnkleKneeCommand> cmd);
 
     Eigen::Vector2d mJPosAct;
     Eigen::Vector2d mJVelAct;
@@ -93,4 +95,10 @@ private:
     double mGrav;
     double mRx;
     double mRy;
+
+    //Sys ID
+    std::vector<double> mThetaBin;
+    std::vector<double> mCmdThetaBin;
+    std::vector<double> mTrqBin;
+    std::vector<double> mCmdTrqBin;
 };
