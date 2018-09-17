@@ -1,0 +1,10 @@
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_pitch _target_slave:=rHipPitch
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_pitch _target_slave:=lHipPitch
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_roll _target_slave:=lHipRoll
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_roll _target_slave:=rHipRoll
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_yaw _target_slave:=lHipYaw
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_hip_yaw _target_slave:=rHipYaw
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_knee _target_slave:=lKnee
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_knee _target_slave:=rKnee
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_ankle _target_slave:=lAnkle
+rosrun linkage_table_loader linkage_table_loader _linkage_type:=DracoBiped_ankle _target_slave:=rAnkle
