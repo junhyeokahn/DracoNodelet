@@ -15,6 +15,14 @@ SET(CMAKE_CXX_FLAGS "-std=c++11")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
+find_package(PnC REQUIRED)
+
+if(${PNC_FOUND})
+    message("PNC FOUND")
+    message(${PNC_INCLUDE_DIRS})
+    message(${PNC_LIBRARIES})
+endif()
 
 find_package(PkgConfig)
 pkg_check_modules(EIGEN3 REQUIRED eigen3)

@@ -11,5 +11,5 @@ FIND_PACKAGE(PkgConfig)
 PKG_CHECK_MODULES(EIGEN3 REQUIRED eigen3)
 INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
-rosbuild_add_library(DracoNodelet src/DracoNodeLet.cpp)
+rosbuild_add_library(DracoNodelet src/DracoNodelet.cpp)
 target_link_libraries(DracoNodelet rt apptronik_ros_utils)

@@ -8,6 +8,9 @@
 
 #include <Eigen/Dense>
 
+#include <apptronik_srvs/UInt16.h>
+#include <apptronik_srvs/Float32.h>
+
 namespace draco_nodelet
 {
   class DracoNodelet: public nodelet::Nodelet
@@ -55,11 +58,20 @@ namespace draco_nodelet
 
     // TODO : Interface
 
-    void _intialize();
+    void _initialize();
     void _preprocess();
     void _sendSafeCmd();
     void _copyData();
     void _copyCommand();
+    void _callFloat32Service(const ros::NodeHandle & nh,
+                             const std::string & slave_name,
+                             const std::string & parameter_name,
+                             const std::string & service_name);
+
+    void _callInt16Service(const ros::NodeHandle & nh,
+                           const std::string & slave_name,
+                           const std::string & parameter_name,
+                           const std::string & service_name);
   };
 
   template <class SrvType>

@@ -91,35 +91,35 @@ namespace draco_nodelet
   void DracoNodelet::_preprocess() {
     for (int i = 0; i < numJoint; ++i) {
         // Set Run Mode
-        m_sys->setRunMode("JOINT_IMPEDANCE", slaveNames[i]);
+        m_sync->setRunMode("JOINT_IMPEDANCE", slaveNames[i]);
 
         // Register State
         jPosList[i] = new double(0.);
-        m_sys->registerStatePtr(jPosList[i], "js__joint__position__rad", slaveNames[i]);
+        m_sync->registerStatePtr(jPosList[i], "js__joint__position__rad", slaveNames[i]);
         jVelList[i] = new double(0.);
-        m_sys->registerStatePtr(jVelList[i], "js__joint__velocity__radps", slaveNames[i]);
+        m_sync->registerStatePtr(jVelList[i], "js__joint__velocity__radps", slaveNames[i]);
         jTrqList[i] = new double(0.);
-        m_sys->registerStatePtr(jTrqList[i], "js__joint__effort__Nm", slaveNames[i]);
+        m_sync->registerStatePtr(jTrqList[i], "js__joint__effort__Nm", slaveNames[i]);
 
         // Register Command
         jPosCmdList[i] = new double(0.);
-        m_sys->registerCommandPtr(jPosCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
+        m_sync->registerCommandPtr(jPosCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
         jVelCmdList[i] = new double(0.);
-        m_sys->registerCommandPtr(jVelCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
+        m_sync->registerCommandPtr(jVelCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
         jTrqCmdList[i] = new double(0.);
-        m_sys->registerCommandPtr(jTrqCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
+        m_sync->registerCommandPtr(jTrqCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
 
         // Service call
-        callSetService(m_nh, slaveNames[i], "joint_kp","/Control__Joint__Impedance__KP/set");
-        callSetService(m_nh, slaveNames[i], "joint_kd","/Control__Joint__Impedance__KD/set");
-        callSetService(m_nh, slaveNames[i], "torque_kp","/Control__Actuator__Effort__KP/set");
-        callSetService(m_nh, slaveNames[i], "torque_kd","/Control__Actuator__Effort__KD/set");
-        callSetService(m_nh, slaveNames[i], "current_limit","/Limits__Motor__Current_Max_A/set");
-        callSetService(m_nh, slaveNames[i], "enable_dob", "/Control__Actuator__Effort__EN_DOB/set");
+        _callFloat32Service(m_nh, slaveNames[i], "joint_kp","/Control__Joint__Impedance__KP/set");
+        _callFloat32Service(m_nh, slaveNames[i], "joint_kd","/Control__Joint__Impedance__KD/set");
+        _callFloat32Service(m_nh, slaveNames[i], "torque_kp","/Control__Actuator__Effort__KP/set");
+        _callFloat32Service(m_nh, slaveNames[i], "torque_kd","/Control__Actuator__Effort__KD/set");
+        _callFloat32Service(m_nh, slaveNames[i], "current_limit","/Limits__Motor__Current_Max_A/set");
+        _callInt16Service(m_nh, slaveNames[i], "enable_dob", "/Control__Actuator__Effort__EN_DOB/set");
     }
   }
 
-  void DracoNodeLet::_copyData() {
+  void DracoNodelet::_copyData() {
     for (int i = 0; i < numJoint; ++i) {
         jPos[i] = *(jPosList[i]);
         jVel[i] = *(jVelList[i]);
@@ -135,6 +135,44 @@ namespace draco_nodelet
         *(jVelCmdList[i]) = jVelCmd[i];
         *(jTrqCmdList[i]) = jTrqCmd[i];
     }
+  }
+
+  void DracoNodelet::_callFloat32Service(const ros::NodeHandle & nh,
+                                         const std::string & slave_name,
+                                         const std::string & parameter_name,
+                                         const std::string & service_name){
+
+      double value;
+      nh.param(slave_name + "/" + parameter_name, value, 0.);
+
+      apptronik_srvs::Float32 srv_float;
+      srv_float.request.set_data = value;
+
+      if(ros::service::exists
+              ("/" + slave_name + service_name, false)) {
+          ros::service::call("/" + slave_name + service_name, srv_float);
+      } else {
+          ROS_WARN("Could not find service %s",("/" + slave_name + service_name).c_str());
+      }
+  }
+
+    void DracoNodelet::_callInt16Service(const ros::NodeHandle & nh,
+                                         const std::string & slave_name,
+                                         const std::string & parameter_name,
+                                         const std::string & service_name) {
+
+      int value;
+      nh.param(slave_name + "/" + parameter_name, value, 0);
+
+      apptronik_srvs::UInt16 srv_int;
+      srv_int.request.set_data = value;
+
+      if(ros::service::exists
+              ("/" + slave_name + service_name, false)) {
+          ros::service::call("/" + slave_name + service_name, srv_int);
+      } else {
+          ROS_WARN("Could not find service %s",("/" + slave_name + service_name).c_str());
+      }
   }
 
 }
