@@ -1,0 +1,105 @@
+lHipRoll:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lHipPitch:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lHipYaw:
+  #joint_kp: 80.0
+  #joint_kd: 5.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lKnee:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+lAnkle:
+  #joint_kp: 18.0
+  #joint_kd: 1.5
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rHipRoll:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rHipPitch:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rHipYaw:
+  #joint_kp: 80.0
+  #joint_kd: 5.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rKnee:
+  #joint_kp: 100.0
+  #joint_kd: 8.0
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  #torque_kp: 4.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0
+
+rAnkle:
+  #joint_kp: 18.0
+  #joint_kd: 1.5
+  joint_kp: 0.0
+  joint_kd: 0.0
+  torque_kp: 0.0
+  torque_kd: 0.0
+  current_limit: 1.0
+  enable_dob: 0

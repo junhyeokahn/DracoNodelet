@@ -1,4 +1,5 @@
 #include "DracoNodelet/DracoNodelet.hpp"
+#include "Configuration.h"
 
 using namespace apptronik_ros_utils;
 namespace draco_nodelet
@@ -14,10 +15,16 @@ namespace draco_nodelet
         delete jPosList[i];
         delete jVelList[i];
         delete jTrqList[i];
+        delete temperatureList[i];
+        delete motorCurrentList[i];
         delete jPosCmdList[i];
         delete jVelCmdList[i];
         delete jTrqCmdList[i];
     }
+
+    delete interface;
+    delete sensor_data;
+    delete cmd;
   }
 
   void DracoNodelet::onInit()
@@ -28,15 +35,14 @@ namespace draco_nodelet
 
   void DracoNodelet::spinThread()
   {
-    _initialize();
-    _preprocess();
 
     //set up controller
     m_sync.reset(new apptronik_ros_utils::Synchronizer(true, "draco_nodelet"));
     m_sync->connect();
     apptronik_ros_utils::enableRT(99, 2);
 
-
+    _initialize();
+    _preprocess();
 
     // bool previously_faulted = false;
     for(std::size_t i = 0; i < slaveNames.size(); ++i) {
@@ -48,13 +54,14 @@ namespace draco_nodelet
     {
       //wait for bus transaction
       m_sync->awaitNextControl();
-      //TODO : _copyData();
+      _copyData();
       if ((m_sync->getAllFaults()).any()) {
-          //TODO : _sendSafeCmd();
+          _setDefaultCmd();
       } else {
-          // TODO : Interface->getCommand(SensorData, CommandData);
-           //TODO : _copyCommand();
+          interface->getCommand(sensor_data, cmd);
+          _checkSafety();
       }
+      _copyCommand();
 
       m_sync->logger->captureLine();
 
@@ -65,6 +72,55 @@ namespace draco_nodelet
     m_sync->awaitShutdownComplete();
   }
 
+  void DracoNodelet::_setDefaultCmd() {
+    jPosCmd = defaultPosition;
+    jVelCmd.setZero();
+    jTrqCmd.setZero();
+  }
+
+  void DracoNodelet::_checkSafety() {
+    // toggle go_safe_config based on sensored jpos, jvel, jtrq,
+    // temperature, and print out which causes that
+
+    // TODO : Do Toggle
+
+    if (go_safe_config) {
+        std::cout << "Going Back to Safe Configuration!" << std::endl;
+        static double time_duration(1.0);
+        static double d_ary[10];
+        static int count(0);
+        double t(count*SERVO_RATE);
+
+        if (!is_safety_spline_generated) {
+            double ini[30]; double fin[30]; double **middle_pt;
+            for (int i = 0; i < 30; ++i) {
+                ini[i] = 0.0;
+                fin[i] = 0.0;
+            }
+            for (int i = 0; i < 10; ++i) {
+                ini[i] = jPos[i];
+                fin[i] = defaultPosition[i];
+            }
+            for (int i = 10; i < 20; ++i) {
+                ini[i] = jVel[i-10];
+            }
+            safety_spline.SetParam(ini, fin, middle_pt, time_duration);
+            is_safety_spline_generated = true;
+        }
+
+        if (t < time_duration) {
+            safety_spline.getCurvePoint(t, d_ary);
+            for (int i = 0; i < 10; ++i) jPosCmd[i] = d_ary[i];
+            safety_spline.getCurveDerPoint(t, 1, d_ary);
+            for (int i = 0; i < 10; ++i) jVelCmd[i] = d_ary[i];
+            jTrqCmd.setZero();
+        } else {
+            _setDefaultCmd();
+        }
+        ++count;
+    }
+  }
+
   void DracoNodelet::_initialize() {
     numJoint = 10;
     jPos = Eigen::VectorXd::Zero(numJoint);
@@ -73,6 +129,8 @@ namespace draco_nodelet
     jPosList.resize(numJoint);
     jVelList.resize(numJoint);
     jTrqList.resize(numJoint);
+    temperatureList.resize(numJoint);
+    motorCurrentList.resize(numJoint);
     jPosCmd = Eigen::VectorXd::Zero(numJoint);
     jVelCmd = Eigen::VectorXd::Zero(numJoint);
     jTrqCmd = Eigen::VectorXd::Zero(numJoint);
@@ -81,10 +139,16 @@ namespace draco_nodelet
     jTrqCmdList.resize(numJoint);
     medullaName = "Medulla_V2";
     slaveNames.resize(numJoint+1);
-    slaveNames = {"rHipYaw", "rHipRoll", "rHipPitch", "rKnee", "rAnkle",
-                  "lHipYaw", "lHipRoll", "lHipPitch", "lKnee", "lAnkle",
+    slaveNames = {"lHipYaw", "lHipRoll", "lHipPitch", "lKnee", "lAnkle",
+                  "rHipYaw", "rHipRoll", "rHipPitch", "rKnee", "rAnkle",
                   medullaName };
-    // TODO : construct interface, data, cmd
+
+    interface = new FixedDracoInterface();
+    sensor_data = new FixedDracoSensorData();
+    cmd = new FixedDracoCommand();
+    go_safe_config = false;
+    is_safety_spline_generated = false;
+    // TODO : read defaultPosition from yaml
 
   }
 
@@ -94,19 +158,23 @@ namespace draco_nodelet
         m_sync->setRunMode("JOINT_IMPEDANCE", slaveNames[i]);
 
         // Register State
-        jPosList[i] = new double(0.);
+        jPosList[i] = new float(0.);
         m_sync->registerStatePtr(jPosList[i], "js__joint__position__rad", slaveNames[i]);
-        jVelList[i] = new double(0.);
+        jVelList[i] = new float(0.);
         m_sync->registerStatePtr(jVelList[i], "js__joint__velocity__radps", slaveNames[i]);
-        jTrqList[i] = new double(0.);
+        jTrqList[i] = new float(0.);
         m_sync->registerStatePtr(jTrqList[i], "js__joint__effort__Nm", slaveNames[i]);
+        temperatureList[i] = new float(0.);
+        m_sync->registerStatePtr(temperatureList[i], "motor__core_temp_est__C", slaveNames[i]);
+        motorCurrentList[i] = new float(0.);
+        m_sync->registerStatePtr(motorCurrentList[i], "motor__current__A", slaveNames[i]);
 
         // Register Command
-        jPosCmdList[i] = new double(0.);
+        jPosCmdList[i] = new float(0.);
         m_sync->registerCommandPtr(jPosCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
-        jVelCmdList[i] = new double(0.);
+        jVelCmdList[i] = new float(0.);
         m_sync->registerCommandPtr(jVelCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
-        jTrqCmdList[i] = new double(0.);
+        jTrqCmdList[i] = new float(0.);
         m_sync->registerCommandPtr(jTrqCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
 
         // Service call
@@ -124,12 +192,19 @@ namespace draco_nodelet
         jPos[i] = *(jPosList[i]);
         jVel[i] = *(jVelList[i]);
         jTrq[i] = *(jTrqList[i]);
+        temperature[i] = *(temperatureList[i]);
+        motorCurrent[i] = *(motorCurrentList[i]);
     }
-    // TODO : copy to sensor data
+    sensor_data->q = jPos;
+    sensor_data->qdot = jVel;
+    sensor_data->jtrq = jTrq;
+    // TODO : add temperature in sensor data
   }
 
   void DracoNodelet::_copyCommand() {
-    // TODO : copy from command
+    jPosCmd = cmd->q;
+    jVelCmd = cmd->qdot;
+    jTrqCmd = cmd->jtrq;
     for (int i = 0; i < numJoint; ++i) {
         *(jPosCmdList[i]) = jPosCmd[i];
         *(jVelCmdList[i]) = jVelCmd[i];

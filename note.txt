@@ -34,6 +34,17 @@ _Then find Kp for critical damped system_
 |------------------------------+------+------+------+-------|
 
 Todo List
-1. 
 
+o See warnings [v]
+o Load parameters and check calibrations [v]
+o Test two ankles [v]
+o joint idx check [v]
+o check service call
+o run with zero gain
+o ROM parameters
+o safety features
+o Test gravity compensation
 
+Questions
+o Josh : printWarnings, printFaults, running nodelet ctrl how to check
+  parameters are written correctly

@@ -11,6 +11,9 @@
 #include <apptronik_srvs/UInt16.h>
 #include <apptronik_srvs/Float32.h>
 
+#include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
+#include "Utils/BSplineBasic.h"
+
 namespace draco_nodelet
 {
   class DracoNodelet: public nodelet::Nodelet
@@ -29,8 +32,6 @@ namespace draco_nodelet
     boost::shared_ptr<apptronik_ros_utils::Synchronizer> m_sync;
     boost::shared_ptr<boost::thread> m_spin_thread;
 
-    //void setUpDataLinks();
-    //void changeToMode(const std::string& desired_mode);
     template <class SrvType>
     void callGetService(const std::string& slave_name, const std::string& srv_name, SrvType& srv_obj);
     template <class SrvType>
@@ -40,27 +41,39 @@ namespace draco_nodelet
     Eigen::VectorXd jPos;
     Eigen::VectorXd jVel;
     Eigen::VectorXd jTrq;
-    std::vector<double*> jPosList;
-    std::vector<double*> jVelList;
-    std::vector<double*> jTrqList;
+    Eigen::VectorXd temperature;
+    Eigen::VectorXd motorCurrent;
+    std::vector<float*> jPosList;
+    std::vector<float*> jVelList;
+    std::vector<float*> jTrqList;
+    std::vector<float*> temperatureList;
+    std::vector<float*> motorCurrentList;;
+    // TODO : add bus voltage for efficiency calc
 
     // Commands
     Eigen::VectorXd jPosCmd;
     Eigen::VectorXd jVelCmd;
     Eigen::VectorXd jTrqCmd;
-    std::vector<double*> jPosCmdList;
-    std::vector<double*> jVelCmdList;
-    std::vector<double*> jTrqCmdList;
+    std::vector<float*> jPosCmdList;
+    std::vector<float*> jVelCmdList;
+    std::vector<float*> jTrqCmdList;
 
     int numJoint;
     std::vector<std::string> slaveNames;
     std::string medullaName;
+    Eigen::VectorXd defaultPosition;
 
-    // TODO : Interface
+    FixedDracoInterface* interface;
+    FixedDracoSensorData* sensor_data;
+    FixedDracoCommand* cmd;
+    BS_Basic<10, 3, 0, 2, 2> safety_spline;
+    bool go_safe_config;
+    bool is_safety_spline_generated;
 
     void _initialize();
     void _preprocess();
-    void _sendSafeCmd();
+    void _checkSafety();
+    void _setDefaultCmd();
     void _copyData();
     void _copyCommand();
     void _callFloat32Service(const ros::NodeHandle & nh,
