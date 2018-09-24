@@ -1,5 +1,6 @@
 #include "DracoNodelet/DracoNodelet.hpp"
 #include "Configuration.h"
+#include "Utils/Utilities.hpp"
 
 using namespace apptronik_ros_utils;
 namespace draco_nodelet
@@ -55,8 +56,9 @@ namespace draco_nodelet
       //wait for bus transaction
       m_sync->awaitNextControl();
       _copyData();
-      if ((m_sync->getAllFaults()).any()) {
-          _setDefaultCmd();
+      //if ((m_sync->getAllFaults()).any()) {
+      if (m_sync->printFaults()) {
+          _setCurrentPositionCmd();
       } else {
           interface->getCommand(sensor_data, cmd);
           _checkSafety();
@@ -72,17 +74,57 @@ namespace draco_nodelet
     m_sync->awaitShutdownComplete();
   }
 
-  void DracoNodelet::_setDefaultCmd() {
-    jPosCmd = defaultPosition;
+  void DracoNodelet::_setCurrentPositionCmd() {
+      jPosCmd = jPos;
+      jVelCmd.setZero();
+      jTrqCmd.setZero();
+  }
+
+  void DracoNodelet::_setHomePositionCmd() {
+    jPosCmd = homePosition;
     jVelCmd.setZero();
     jTrqCmd.setZero();
   }
 
+  void DracoNodelet::_turnOff() {
+    for (int i = 0; i < numJoint; ++i) {
+        m_sync->setRunMode("OFF", slaveNames[i]);
+    }
+  }
+
   void DracoNodelet::_checkSafety() {
+      jPosCmd = cmd->q;
+      jVelCmd = cmd->qdot;
+      jTrqCmd = cmd->jtrq;
     // toggle go_safe_config based on sensored jpos, jvel, jtrq,
     // temperature, and print out which causes that
 
-    // TODO : Do Toggle
+    if (!(myUtils::isInBoundingBox(minPosition, jPos, maxPosition))) {
+        std::cout << "Measured Joint Position Hits the Limit" << std::endl;
+        std::cout << jPos << std::endl;
+        go_safe_config = true;
+        _turnOff();
+    } else if (!(myUtils::isInBoundingBox(minPosition, jPosCmd, maxPosition))) {
+        std::cout << "Commanded Joint Position Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else if (!(myUtils::isInBoundingBox(Eigen::VectorXd::Constant(numJoint, -50.), temperature, maxTemperature))) {
+        std::cout << "Temperature Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else if (!(myUtils::isInBoundingBox(-maxVelocity, jVelCmd, maxVelocity))) {
+        std::cout << "Commanded Joint Velocity Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else if (!(myUtils::isInBoundingBox(-maxVelocity, jVel, maxVelocity))) {
+        std::cout << "Measured Joint Velocity Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else if (!(myUtils::isInBoundingBox(-maxTrq, jTrqCmd, maxTrq))) {
+        std::cout << "Commanded Joint Torque Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else if (!(myUtils::isInBoundingBox(-maxTrq, jTrq, maxTrq))) {
+        std::cout << "Measured Joint Torque Hits the Limit" << std::endl;
+        go_safe_config = true;
+    } else {
+        // Do Nothing
+    }
 
     if (go_safe_config) {
         std::cout << "Going Back to Safe Configuration!" << std::endl;
@@ -99,7 +141,7 @@ namespace draco_nodelet
             }
             for (int i = 0; i < 10; ++i) {
                 ini[i] = jPos[i];
-                fin[i] = defaultPosition[i];
+                fin[i] = homePosition[i];
             }
             for (int i = 10; i < 20; ++i) {
                 ini[i] = jVel[i-10];
@@ -115,9 +157,12 @@ namespace draco_nodelet
             for (int i = 0; i < 10; ++i) jVelCmd[i] = d_ary[i];
             jTrqCmd.setZero();
         } else {
-            _setDefaultCmd();
+            _turnOff();
+            //_setHomePositionCmd();
         }
         ++count;
+    } else {
+        // do nothing
     }
   }
 
@@ -126,6 +171,8 @@ namespace draco_nodelet
     jPos = Eigen::VectorXd::Zero(numJoint);
     jVel = Eigen::VectorXd::Zero(numJoint);
     jTrq = Eigen::VectorXd::Zero(numJoint);
+    temperature = Eigen::VectorXd::Zero(numJoint);
+    motorCurrent = Eigen::VectorXd::Zero(numJoint);
     jPosList.resize(numJoint);
     jVelList.resize(numJoint);
     jTrqList.resize(numJoint);
@@ -148,8 +195,16 @@ namespace draco_nodelet
     cmd = new FixedDracoCommand();
     go_safe_config = false;
     is_safety_spline_generated = false;
-    // TODO : read defaultPosition from yaml
-
+    YAML::Node safety_cfg =
+        YAML::LoadFile(THIS_COM"Config/Draco/SAFETY.yaml");
+    myUtils::readParameter(safety_cfg, "home_position", homePosition);
+    myUtils::readParameter(safety_cfg, "max_temperature", maxTemperature);
+    myUtils::readParameter(safety_cfg, "max_position", maxPosition);
+    myUtils::readParameter(safety_cfg, "min_position", minPosition);
+    myUtils::readParameter(safety_cfg, "max_velocity", maxVelocity);
+    myUtils::readParameter(safety_cfg, "max_trq", maxTrq);
+    maxPosition += Eigen::VectorXd::Constant(numJoint, 0.2);
+    minPosition -= Eigen::VectorXd::Constant(numJoint, 0.2);
   }
 
   void DracoNodelet::_preprocess() {
@@ -173,17 +228,42 @@ namespace draco_nodelet
         jPosCmdList[i] = new float(0.);
         m_sync->registerCommandPtr(jPosCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
         jVelCmdList[i] = new float(0.);
-        m_sync->registerCommandPtr(jVelCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
+        m_sync->registerCommandPtr(jVelCmdList[i], "cmd__joint__velocity__radps", slaveNames[i]);
         jTrqCmdList[i] = new float(0.);
-        m_sync->registerCommandPtr(jTrqCmdList[i], "cmd__joint__position__rad", slaveNames[i]);
+        m_sync->registerCommandPtr(jTrqCmdList[i], "cmd__joint__effort__nm", slaveNames[i]);
 
-        // Service call
-        _callFloat32Service(m_nh, slaveNames[i], "joint_kp","/Control__Joint__Impedance__KP/set");
-        _callFloat32Service(m_nh, slaveNames[i], "joint_kd","/Control__Joint__Impedance__KD/set");
-        _callFloat32Service(m_nh, slaveNames[i], "torque_kp","/Control__Actuator__Effort__KP/set");
-        _callFloat32Service(m_nh, slaveNames[i], "torque_kd","/Control__Actuator__Effort__KD/set");
-        _callFloat32Service(m_nh, slaveNames[i], "current_limit","/Limits__Motor__Current_Max_A/set");
-        _callInt16Service(m_nh, slaveNames[i], "enable_dob", "/Control__Actuator__Effort__EN_DOB/set");
+    }
+    _parameterSetting();
+  }
+  void DracoNodelet::_parameterSetting() {
+    YAML::Node ll_config =
+        YAML::LoadFile(THIS_COM"Config/Draco/LOW_LEVEL_CONFIG.yaml");
+    Eigen::VectorXd jp_kp, jp_kd, t_kp, t_kd, current_limit;
+    Eigen::VectorXi en_auto_kd, en_dob;
+    myUtils::readParameter(ll_config, "jp_kp", jp_kp);
+    myUtils::readParameter(ll_config, "jp_kd", jp_kd);
+    myUtils::readParameter(ll_config, "t_kp", t_kp);
+    myUtils::readParameter(ll_config, "t_kd", t_kd);
+    myUtils::readParameter(ll_config, "current_limit", current_limit);
+    myUtils::readParameter(ll_config, "en_auto_kd", en_auto_kd);
+    myUtils::readParameter(ll_config, "en_dob", en_dob);
+    for (int i = 0; i < numJoint; ++i) {
+        apptronik_srvs::Float32 srv_float;
+        apptronik_srvs::UInt16 srv_int;
+        srv_float.request.set_data = jp_kp[i];
+        callSetService(slaveNames[i], "Control__Joint__Impedance__KP", srv_float);
+        srv_float.request.set_data = jp_kd[i];
+        callSetService(slaveNames[i], "Control__Joint__Impedance__KD", srv_float);
+        srv_float.request.set_data = t_kp[i];
+        callSetService(slaveNames[i], "Control__Actuator__Effort__KP", srv_float);
+        srv_float.request.set_data = t_kd[i];
+        callSetService(slaveNames[i], "Control__Actuator__Effort__KD", srv_float);
+        srv_float.request.set_data = current_limit[i];
+        callSetService(slaveNames[i], "Limits__Motor__Current_Max_A", srv_float);
+        srv_int.request.set_data = en_dob[i];
+        callSetService(slaveNames[i], "Control__Actuator__Effort__EN_DOB", srv_int);
+        srv_int.request.set_data = en_auto_kd[i];
+        callSetService(slaveNames[i], "Control__Actuator__Effort__AutoKD", srv_int);
     }
   }
 
@@ -202,54 +282,12 @@ namespace draco_nodelet
   }
 
   void DracoNodelet::_copyCommand() {
-    jPosCmd = cmd->q;
-    jVelCmd = cmd->qdot;
-    jTrqCmd = cmd->jtrq;
     for (int i = 0; i < numJoint; ++i) {
         *(jPosCmdList[i]) = jPosCmd[i];
         *(jVelCmdList[i]) = jVelCmd[i];
         *(jTrqCmdList[i]) = jTrqCmd[i];
     }
   }
-
-  void DracoNodelet::_callFloat32Service(const ros::NodeHandle & nh,
-                                         const std::string & slave_name,
-                                         const std::string & parameter_name,
-                                         const std::string & service_name){
-
-      double value;
-      nh.param(slave_name + "/" + parameter_name, value, 0.);
-
-      apptronik_srvs::Float32 srv_float;
-      srv_float.request.set_data = value;
-
-      if(ros::service::exists
-              ("/" + slave_name + service_name, false)) {
-          ros::service::call("/" + slave_name + service_name, srv_float);
-      } else {
-          ROS_WARN("Could not find service %s",("/" + slave_name + service_name).c_str());
-      }
-  }
-
-    void DracoNodelet::_callInt16Service(const ros::NodeHandle & nh,
-                                         const std::string & slave_name,
-                                         const std::string & parameter_name,
-                                         const std::string & service_name) {
-
-      int value;
-      nh.param(slave_name + "/" + parameter_name, value, 0);
-
-      apptronik_srvs::UInt16 srv_int;
-      srv_int.request.set_data = value;
-
-      if(ros::service::exists
-              ("/" + slave_name + service_name, false)) {
-          ros::service::call("/" + slave_name + service_name, srv_int);
-      } else {
-          ROS_WARN("Could not find service %s",("/" + slave_name + service_name).c_str());
-      }
-  }
-
 }
 
 #include <pluginlib/class_list_macros.h>

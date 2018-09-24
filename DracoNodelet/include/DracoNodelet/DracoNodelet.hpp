@@ -61,7 +61,15 @@ namespace draco_nodelet
     int numJoint;
     std::vector<std::string> slaveNames;
     std::string medullaName;
-    Eigen::VectorXd defaultPosition;
+
+    // Safety Factors
+    Eigen::VectorXd homePosition;
+    Eigen::VectorXd maxTemperature;
+    Eigen::VectorXd maxPosition;
+    Eigen::VectorXd minPosition;
+    Eigen::VectorXd maxVelocity;
+    Eigen::VectorXd maxTrq;
+    void _turnOff();
 
     FixedDracoInterface* interface;
     FixedDracoSensorData* sensor_data;
@@ -73,18 +81,11 @@ namespace draco_nodelet
     void _initialize();
     void _preprocess();
     void _checkSafety();
-    void _setDefaultCmd();
+    void _setHomePositionCmd();
+    void _setCurrentPositionCmd();
     void _copyData();
     void _copyCommand();
-    void _callFloat32Service(const ros::NodeHandle & nh,
-                             const std::string & slave_name,
-                             const std::string & parameter_name,
-                             const std::string & service_name);
-
-    void _callInt16Service(const ros::NodeHandle & nh,
-                           const std::string & slave_name,
-                           const std::string & parameter_name,
-                           const std::string & service_name);
+    void _parameterSetting();
   };
 
   template <class SrvType>

@@ -4,7 +4,7 @@
   <param name="/synapse/enforced_loop_rate" value="$(arg enforced_loop_rate)"/>
   <include file="$(find synapse)/launch/synapse.launch"/>
   <node pkg="nodelet" type="nodelet" name="DracoNodelet" args="load draco_nodelet/DracoNodelet synapse_group --no-bond" output="screen">
-      <rosparam file="$(find DracoNodelet)/config/joint_config.yaml" command="load" />
+      <!--<rosparam file="$(find DracoNodelet)/config/joint_config.yaml" command="load" />-->
   </node>
 
 </launch>
