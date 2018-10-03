@@ -35,11 +35,15 @@ _Then find Kp for critical damped system_
 
 Todo List
 ===============================================================================
-o ROM parameters <-- n. paine
+
+o ROM parameters <-- Nick
 o Find better model for gravity comp
-o Fix temperature est on the rknee <-- uday
+o Fix temperature est on the rknee <-- Uday
 o Better safety criteria and validate it
+o Wrong reading <-- Talk to Josh
+
 -------------------------------------------------------------------------------
+
 o Change the way to set parameters
 o Check calibration before start experiment
 o Joint position control
@@ -54,6 +58,5 @@ o Force control
       o Might try admittance contorl
       o Gain tuning
     o Use DoB
-===============================================================================
 
-Questions
+===============================================================================

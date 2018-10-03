@@ -1,0 +1,11 @@
+rosdistro: 'kinetic
+
+  '
+roslaunch:
+  uris: {host_algedi__36651: 'http://Algedi:36651/'}
+rosversion: '1.12.7
+
+  '
+run_id: d54aa978-c356-11e8-a7dd-e4a471594944
+synapse: {electronic_debug_mode: false, enforced_loop_rate: 1300, interface_name: ecat,
+  publish_rate: 100}

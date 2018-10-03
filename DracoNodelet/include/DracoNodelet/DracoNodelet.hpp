@@ -43,12 +43,16 @@ namespace draco_nodelet
     Eigen::VectorXd jTrq;
     Eigen::VectorXd temperature;
     Eigen::VectorXd motorCurrent;
+    Eigen::VectorXd busVoltage;
+    Eigen::VectorXd busCurrent;
     std::vector<float*> jPosList;
     std::vector<float*> jVelList;
     std::vector<float*> jTrqList;
     std::vector<float*> temperatureList;
     std::vector<float*> motorCurrentList;;
-    // TODO : add bus voltage for efficiency calc
+    std::vector<float*> busVoltageList;
+    std::vector<float*> busCurrentList;
+
 
     // Commands
     Eigen::VectorXd jPosCmd;
@@ -80,12 +84,18 @@ namespace draco_nodelet
 
     void _initialize();
     void _preprocess();
-    void _checkSafety();
+    void _checkSensorData();
+    void _checkCommand();
     void _setHomePositionCmd();
     void _setCurrentPositionCmd();
     void _copyData();
     void _copyCommand();
     void _parameterSetting();
+
+    int mCount;
+    Eigen::VectorXd prevJPos;
+    Eigen::VectorXd prevJVel;
+    Eigen::VectorXd prevJTrq;
   };
 
   template <class SrvType>
