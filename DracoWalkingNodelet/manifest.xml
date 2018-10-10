@@ -1,0 +1,21 @@
+<package>
+  <description brief="DracoNodeLet">
+
+     draco_walking_nodelet
+
+  </description>
+  <author>Apptronik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/DracoNodeLet</url>
+  <depend package="apptronik_ros"/>
+  <depend package="apptronik_ros_utils"/>
+  <depend package="apptronik_srvs"/>
+  <depend package="nodelet"/>
+
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml" />
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export>
+
+</package>

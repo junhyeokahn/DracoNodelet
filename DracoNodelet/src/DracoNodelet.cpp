@@ -45,8 +45,10 @@ namespace draco_nodelet
     m_sync->connect();
     apptronik_ros_utils::enableRT(99, 2);
 
+    // Initialize
     _initialize();
     _preprocess();
+    // Initialize
 
     // bool previously_faulted = false;
     for(std::size_t i = 0; i < slaveNames.size(); ++i) {
