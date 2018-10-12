@@ -17,4 +17,6 @@ link_directories("/usr/local/lib")
 rosbuild_add_library(DracoWalkingNodelet src/DracoWalkingNodelet.cpp)
 target_link_libraries(DracoWalkingNodelet rt
                                           apptronik_ros_utils
-                                          DracoBip_Controller dynacore_utils)
+                                          DracoBip_Controller 
+                                          dynacore_utils 
+                                          dynacore_param_handler)

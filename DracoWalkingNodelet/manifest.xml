@@ -1,5 +1,5 @@
 <package>
-  <description brief="DracoNodeLet">
+  <description brief="DracoWalkingNodelet">
 
      draco_walking_nodelet
 
@@ -7,7 +7,7 @@
   <author>Apptronik</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/DracoNodeLet</url>
+  <url>http://ros.org/wiki/DracoWalkingNodelet</url>
   <depend package="apptronik_ros"/>
   <depend package="apptronik_ros_utils"/>
   <depend package="apptronik_srvs"/>

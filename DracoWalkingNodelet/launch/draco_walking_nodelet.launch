@@ -1,0 +1,11 @@
+<launch>
+  <arg name="enforced_loop_rate" default="1000"/>
+
+  <param name="/synapse/enforced_loop_rate" value="$(arg enforced_loop_rate)"/>
+  <include file="$(find synapse)/launch/synapse.launch"/>
+  <node pkg="nodelet" type="nodelet" name="DracoWalkingNodelet" 
+      args="load draco_walking_nodelet/DracoWalkingNodelet synapse_group --no-bond" output="screen">
+      <!--<rosparam file="$(find DracoNodelet)/config/joint_config.yaml" command="load" />-->
+  </node>
+
+</launch>

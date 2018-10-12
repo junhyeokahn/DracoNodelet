@@ -1,6 +1,7 @@
 #include "DracoWalkingNodelet/DracoWalkingNodelet.hpp"
 #include <stdexcept>
 #include <DracoBip_Controller/DracoBip_interface.hpp>
+#include <ParamHandler/ParamHandler.hpp>
 
 using namespace apptronik_ros_utils;
 namespace draco_walking_nodelet
@@ -27,6 +28,18 @@ namespace draco_walking_nodelet
         delete interface_;
         delete sensor_data;
         delete cmd;
+
+        jPosList.clear();
+        jVelList.clear();
+        jTrqList.clear();
+        temperatureList.clear();
+        motorCurrentList.clear();
+        busVoltageList.clear();
+        busCurrentList.clear();
+        jPosCmdList.clear();
+        jVelCmdList.clear();
+        jTrqCmdList.clear();
+
     }
 
     void DracoWalkingNodelet::onInit()
@@ -65,8 +78,8 @@ namespace draco_walking_nodelet
 
             } else {
                 interface_->GetCommand(sensor_data, cmd);
+                _copyCommand();
             }
-            _copyCommand();
 
             m_sync->logger->captureLine();
 
@@ -74,11 +87,24 @@ namespace draco_walking_nodelet
             m_sync->finishControl();
 
             ++mCount;
+
+            // TEST
+            //if(mCount < 2000){
+                //_print_state();
+            //}else{
+                //exit(0);
+            //}
         }
 
         m_sync->awaitShutdownComplete();
     }
 
+    void DracoWalkingNodelet::_print_state(){
+        for(int i(0); i<numJoint; ++i){
+            printf("%d joint pos: %f\n", i, *jPosList[i]);
+        }
+        printf("\n");
+    }
     void DracoWalkingNodelet::_setCurrentPositionCmd() {
         for (int i = 0; i < numJoint; ++i) {
             *(jPosCmdList[i]) = (*(jPosList[i]));
@@ -148,43 +174,35 @@ namespace draco_walking_nodelet
             m_sync->registerCommandPtr(jTrqCmdList[i], "cmd__joint__effort__nm", slaveNames[i]);
 
         }
+        m_sync->registerStatePtr(&imu_ang_vel_x_, "gyro__x__angularRate__radps", medullaName);
+        m_sync->registerStatePtr(&imu_ang_vel_y_, "gyro__y__angularRate__radps", medullaName);
+        m_sync->registerStatePtr(&imu_ang_vel_z_, "gyro__z__angularRate__radps", medullaName);
+
+        m_sync->registerStatePtr(&imu_acc_x_, "accelerometer__x__acceleration__mps2", medullaName);
+        m_sync->registerStatePtr(&imu_acc_y_, "accelerometer__y__acceleration__mps2", medullaName);
+        m_sync->registerStatePtr(&imu_acc_z_, "accelerometer__z__acceleration__mps2", medullaName);
     }
     void DracoWalkingNodelet::_parameterSetting() {
+        std::vector<double> jp_kp, jp_kd, current_limit;
 
-        //Eigen::VectorXd jp_kp, jp_kd, t_kp, t_kd, current_limit;
-        //Eigen::VectorXi en_auto_kd, en_dob;
-        //try {
-        //YAML::Node ll_config =
-        //YAML::LoadFile(DracoBipConfigPath"LOW_LEVEL_CONFIG.yaml");
-        //myUtils::readParameter(ll_config, "jp_kp", jp_kp);
-        //myUtils::readParameter(ll_config, "jp_kd", jp_kd);
-        //myUtils::readParameter(ll_config, "t_kp", t_kp);
-        //myUtils::readParameter(ll_config, "t_kd", t_kd);
-        //myUtils::readParameter(ll_config, "current_limit", current_limit);
-        //myUtils::readParameter(ll_config, "en_auto_kd", en_auto_kd);
-        //myUtils::readParameter(ll_config, "en_dob", en_dob);
-        //} catch(std::runtime_error& e) {
-        //std::cout << "Error Reading Parameter [" << e.what() << "[" << std::endl;
-        //}
+        ParamHandler handler(DracoBipConfigPath"LOW_LEVEL_CONFIG.yaml");
+        handler.getVector("jp_kp", jp_kp);
+        handler.getVector("jp_kd", jp_kd);
+        handler.getVector("current_limit", current_limit);
 
-        //for (int i = 0; i < numJoint; ++i) {
-        //apptronik_srvs::Float32 srv_float;
-        //apptronik_srvs::UInt16 srv_int;
-        //srv_float.request.set_data = jp_kp[i];
-        //callSetService(slaveNames[i], "Control__Joint__Impedance__KP", srv_float);
-        //srv_float.request.set_data = jp_kd[i];
-        //callSetService(slaveNames[i], "Control__Joint__Impedance__KD", srv_float);
-        //srv_float.request.set_data = t_kp[i];
-        //callSetService(slaveNames[i], "Control__Actuator__Effort__KP", srv_float);
-        //srv_float.request.set_data = t_kd[i];
-        //callSetService(slaveNames[i], "Control__Actuator__Effort__KD", srv_float);
-        //srv_float.request.set_data = current_limit[i];
-        //callSetService(slaveNames[i], "Limits__Motor__Current_Max_A", srv_float);
-        //srv_int.request.set_data = en_dob[i];
-        //callSetService(slaveNames[i], "Control__Actuator__Effort__EN_DOB", srv_int);
-        //srv_int.request.set_data = en_auto_kd[i];
-        //callSetService(slaveNames[i], "Control__Actuator__Effort__AutoKD", srv_int);
-        //}
+        for (int i = 0; i < numJoint; ++i) {
+            apptronik_srvs::Float32 srv_float;
+            apptronik_srvs::UInt16 srv_int;
+        
+            srv_float.request.set_data = jp_kp[i];
+            callSetService(slaveNames[i], "Control__Joint__Impedance__KP", srv_float);
+            
+            srv_float.request.set_data = jp_kd[i];
+            callSetService(slaveNames[i], "Control__Joint__Impedance__KD", srv_float);
+            
+            srv_float.request.set_data = current_limit[i];
+            callSetService(slaveNames[i], "Limits__Motor__Current_Max_A", srv_float);
+        }
     }
 
     void DracoWalkingNodelet::_copyData() {
@@ -198,8 +216,19 @@ namespace draco_walking_nodelet
             sensor_data->bus_voltage[i] = static_cast<double> (*(busVoltageList[i]));
             sensor_data->bus_current[i] = static_cast<double> (*(busCurrentList[i]));
 
+            sensor_data->imu_ang_vel[0] = imu_ang_vel_x_;
+            sensor_data->imu_ang_vel[1] = -imu_ang_vel_z_;
+            sensor_data->imu_ang_vel[2] = imu_ang_vel_y_;
+
+            sensor_data->imu_acc[0] = imu_acc_x_;
+            sensor_data->imu_acc[1] = -imu_acc_z_;
+            sensor_data->imu_acc[2] = imu_acc_y_;
+
             // TODO
             sensor_data->rotor_inertia[i] = 0.;
+
+            sensor_data->rfoot_contact = false;
+            sensor_data->lfoot_contact = false;
         }
     }
 

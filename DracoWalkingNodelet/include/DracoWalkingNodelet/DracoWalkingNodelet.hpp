@@ -25,7 +25,9 @@ namespace draco_walking_nodelet
     DracoWalkingNodelet();
     ~DracoWalkingNodelet();
 
+
   private:
+    void _print_state();
     uint64_t m_last_rt_lnx_time_ns, m_last_ec_bus_time_ns;
     uint64_t m_rt_lnx_dt_ns,        m_ec_bus_dt_ns;
 
@@ -77,6 +79,14 @@ namespace draco_walking_nodelet
     Eigen::VectorXd prevJPos;
     Eigen::VectorXd prevJVel;
     Eigen::VectorXd prevJTrq;
+
+    float imu_ang_vel_x_;
+    float imu_ang_vel_y_;
+    float imu_ang_vel_z_;
+
+    float imu_acc_x_;
+    float imu_acc_y_;
+    float imu_acc_z_;
   };
 
   template <class SrvType>

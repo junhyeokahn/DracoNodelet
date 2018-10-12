@@ -1,0 +1,10 @@
+<library path="lib/libDracoWalkingNodelet">
+    <class name="draco_walking_nodelet/DracoWalkingNodelet" 
+        type="draco_walking_nodelet::DracoWalkingNodelet" 
+        base_class_type="nodelet::Nodelet">
+  <description>
+    draco nodelet
+  </description>
+  </class>
+</library>
+
