@@ -74,6 +74,9 @@ namespace draco_walking_nodelet
 
             _copyData();
             _setCurrentPositionCmd();
+           
+            // TEST
+                interface_->GetCommand(sensor_data, cmd);
             if (m_sync->printFaults()) {
 
             } else {
@@ -183,25 +186,29 @@ namespace draco_walking_nodelet
         m_sync->registerStatePtr(&imu_acc_z_, "accelerometer__z__acceleration__mps2", medullaName);
     }
     void DracoWalkingNodelet::_parameterSetting() {
-        std::vector<double> jp_kp, jp_kd, current_limit;
+        std::vector<double> jp_kp, jp_kd, current_limit, temperature_limit;
 
         ParamHandler handler(DracoBipConfigPath"LOW_LEVEL_CONFIG.yaml");
         handler.getVector("jp_kp", jp_kp);
         handler.getVector("jp_kd", jp_kd);
         handler.getVector("current_limit", current_limit);
+        handler.getVector("temperature_limit", temperature_limit);
 
         for (int i = 0; i < numJoint; ++i) {
             apptronik_srvs::Float32 srv_float;
             apptronik_srvs::UInt16 srv_int;
-        
+
             srv_float.request.set_data = jp_kp[i];
             callSetService(slaveNames[i], "Control__Joint__Impedance__KP", srv_float);
-            
+
             srv_float.request.set_data = jp_kd[i];
             callSetService(slaveNames[i], "Control__Joint__Impedance__KD", srv_float);
-            
+
             srv_float.request.set_data = current_limit[i];
             callSetService(slaveNames[i], "Limits__Motor__Current_Max_A", srv_float);
+
+            srv_float.request.set_data = temperature_limit[i];
+            callSetService(slaveNames[i], "Limits__Motor__Max_winding_temp_C", srv_float);
         }
     }
 
@@ -236,7 +243,7 @@ namespace draco_walking_nodelet
         for (int i = 0; i < numJoint; ++i) {
             *(jPosCmdList[i]) = static_cast<float>(cmd->jpos_cmd[i]);
             *(jVelCmdList[i]) = static_cast<float>(cmd->jvel_cmd[i]);
-            *(jTrqCmdList[i]) = static_cast<float>(cmd->jtorque_cmd[i]);   
+            *(jTrqCmdList[i]) = static_cast<float>(cmd->jtorque_cmd[i]);
         }
     }
 }
