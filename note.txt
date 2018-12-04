@@ -1,4 +1,5 @@
-Way to calibrate potentiometer(Actuator position)
+_Way to calibrate potentiometer(Actuator position)_
+
 1. Go to hard stop, where we know the actuator length.
 2. Open Sensing>>LinearPos.
 3. Set the actuator Position1_m with the known value.
@@ -7,7 +8,8 @@ Way to calibrate potentiometer(Actuator position)
    by motor position) and set the Position2_m with it(read UI).
 6. Set Pot_calibration 2 and back to 0
 
-Way to start running synapse and embedded code
+_Way to start running synapse and embedded code_
+
 1. Pull the latest apptronik_ros and apptronik_embedded
 2. In CCS, import bootloader, medulla_v2_generic, axon_v2 as a project
 3. Compile the projects. For the case of Axon, choose proper option
@@ -18,6 +20,40 @@ Way to start running synapse and embedded code
    rosrun application_loader application_loader ~.hex 2,3,4,5,6 1
    Note that the command should be typed in 5 secs after you turn on.
 7. roslaunch synapse compatibility.launch in order to use UI
+
+_Sensor Calibration Procedure_
+
+1. Actuator Position Min/Max
+2. Joint Position Min/Max
+3. Joint Data Polarity
+4. Force Sensor Calibration
+5. Current Calibration / Feed Forward Calibration
+6. Joint Impedance Ctrl Gain Test
+
+|-----------+--------+--------+--------+---------|
+|           | A Max  | A Min  | J Max  | J Min   |
+|===========+========+========+========+=========|
+| rHipRoll  | 0.1763 | 0.0922 | 0.2764 |         |
+|-----------+--------+--------+--------+---------|
+| rHipYaw   | 0.1497 | 0.0812 |        |         |
+|-----------+--------+--------+--------+---------|
+| rHipPitch | 0.1578 | 0.0916 |        |         |
+|-----------+--------+--------+--------+---------|
+| rKnee     | 0.1578 | 0.0922 |        | 0       |
+|-----------+--------+--------+--------+---------|
+| rAnkle    | 0.1125 | 0.0847 |        | 2.2672  |
+|-----------+--------+--------+--------+---------|
+| lHipRoll  | 0.1763 | 0.0922 |        | -0.2764 |
+|-----------+--------+--------+--------+---------|
+| lHipYaw   | 0.1497 | 0.0812 |        |         |
+|-----------+--------+--------+--------+---------|
+| lHipPitch | 0.1578 | 0.0916 |        |         |
+|-----------+--------+--------+--------+---------|
+| lKnee     | 0.1578 | 0.0922 |        | 0       |
+|-----------+--------+--------+--------+---------|
+| lAnkle    | 0.1125 | 0.0847 |        | 2.2672  |
+|-----------+--------+--------+--------+---------|
+
 
 _Find Kd not destabilizing the motor around q = 1.0_
 _Then find Kp for critical damped system_
@@ -37,26 +73,8 @@ Todo List
 ===============================================================================
 
 o ROM parameters <-- Nick
-o Find better model for gravity comp
-o Fix temperature est on the rknee <-- Uday
 o Better safety criteria and validate it
-o Wrong reading <-- Talk to Josh
+o Mocap Code
+o Mocap Installation
 
 -------------------------------------------------------------------------------
-
-o Change the way to set parameters
-o Check calibration before start experiment
-o Joint position control
-  o Increase frequency slowly and improve tracking performance
-    o Find better model
-    o Gain tuning
-o Force control
-  o Do zero force control from nodelet controller
-    o Might need to use orion's script to calibrate the torque
-  o OSC control without kp & kd
-    o Increase frequency gradually and imporve tracking performance
-      o Might try admittance contorl
-      o Gain tuning
-    o Use DoB
-
-===============================================================================

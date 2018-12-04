@@ -14,11 +14,8 @@ INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
 find_package(PnC)
 include_directories(${PNC_INCLUDE_DIRS})
-set(drake_DIR /opt/drake/lib/cmake/drake)
-find_package(drake CONFIG REQUIRED)
 
 rosbuild_add_library(DracoNodelet src/DracoNodelet.cpp)
 target_link_libraries(DracoNodelet rt
                                    apptronik_ros_utils
-                                   ${PNC_LIBRARIES}
-                                   drake::drake)
+                                   ${PNC_LIBRARIES})

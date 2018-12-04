@@ -1,0 +1,7 @@
+Sensor Calibration Procedure
+1. Actuator Position Min/Max
+2. Joint Position Min/Max
+3. Joint Data Polarity
+4. Force Sensor Calibration
+5. Current Calibration / Feed Forward Calibration
+6. Joint Impedance Ctrl Calibration

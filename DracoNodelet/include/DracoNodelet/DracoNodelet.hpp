@@ -11,8 +11,7 @@
 #include <apptronik_srvs/UInt16.h>
 #include <apptronik_srvs/Float32.h>
 
-#include "PnC/FixedDracoPnC/FixedDracoInterface.hpp"
-#include "Utils/BSplineBasic.h"
+#include "PnC/DracoPnC/DracoInterface.hpp"
 
 namespace draco_nodelet
 {
@@ -45,6 +44,13 @@ namespace draco_nodelet
     Eigen::VectorXd motorCurrent;
     Eigen::VectorXd busVoltage;
     Eigen::VectorXd busCurrent;
+    Eigen::VectorXd imuAngVel; // x, y, z
+    Eigen::VectorXd imuAcc;  // x, y, z
+    Eigen::VectorXd rotorInertia;
+    bool rFootContact;
+    bool lFootContact;
+    Eigen::VectorXd rFootATI;
+    Eigen::VectorXd lFootATI;
     std::vector<float*> jPosList;
     std::vector<float*> jVelList;
     std::vector<float*> jTrqList;
@@ -52,7 +58,11 @@ namespace draco_nodelet
     std::vector<float*> motorCurrentList;;
     std::vector<float*> busVoltageList;
     std::vector<float*> busCurrentList;
-
+    std::vector<float*> imuAngVelList;
+    std::vector<float*> imuAccList;
+    std::vector<float*> rotorInertiaList;
+    std::vector<float*> rFootATIList; // Tx, Ty, Tz, Fx, Fy, Fz
+    std::vector<float*> lFootATIList; // Tx, Ty, Tz, Fx, Fy, Fz
 
     // Commands
     Eigen::VectorXd jPosCmd;
@@ -65,9 +75,9 @@ namespace draco_nodelet
     int numJoint;
     std::vector<std::string> slaveNames;
     std::string medullaName;
+    std::vector<std::string> sensilumNames;
 
     // Safety Factors
-    Eigen::VectorXd homePosition;
     Eigen::VectorXd maxTemperature;
     Eigen::VectorXd maxPosition;
     Eigen::VectorXd minPosition;
@@ -75,46 +85,37 @@ namespace draco_nodelet
     Eigen::VectorXd maxTrq;
     void _turnOff();
 
-    FixedDracoInterface* interface;
-    FixedDracoSensorData* sensor_data;
-    FixedDracoCommand* cmd;
-    BS_Basic<10, 3, 0, 2, 2> safety_spline;
-    bool go_safe_config;
-    bool is_safety_spline_generated;
+    DracoInterface* interface;
+    DracoSensorData* sensor_data;
+    DracoCommand* cmd;
 
     void _initialize();
     void _preprocess();
     void _checkSensorData();
     void _checkCommand();
-    void _setHomePositionCmd();
     void _setCurrentPositionCmd();
     void _copyData();
     void _copyCommand();
     void _parameterSetting();
+    void _InterfaceInitialize();
 
     int mCount;
-    Eigen::VectorXd prevJPos;
-    Eigen::VectorXd prevJVel;
-    Eigen::VectorXd prevJTrq;
   };
 
   template <class SrvType>
   void DracoNodelet::callSetService(const std::string& slave_name, const std::string& srv_name, SrvType& srv_obj)
   {
     std::string full_set_service = "/" + slave_name + "/" + srv_name + "/" + "set";
-    //ros::NodeHandle nh("~"); // for Nodes
     ros::NodeHandle nh = getPrivateNodeHandle();  // for Nodelets
 
     ros::ServiceClient client = nh.serviceClient<SrvType>(full_set_service);
 
     if (client.call(srv_obj))
     {
-      // ROS_INFO("Called /%s/%s/set", slave_name.c_str(), srv_name.c_str()); // for Nodes
       NODELET_INFO_STREAM("Called /" << slave_name.c_str() << "/" << srv_name.c_str()); // for Nodelets
     }
     else
     {
-      // ROS_ERROR("Failed to call service: %s", full_get_service.c_str()); // for Nodes
       NODELET_INFO_STREAM("Failed to call service: " << full_set_service.c_str()); // for Nodelets
     }
   }
@@ -123,19 +124,16 @@ namespace draco_nodelet
   void DracoNodelet::callGetService(const std::string& slave_name, const std::string& srv_name, SrvType& srv_obj)
   {
     std::string full_get_service = "/" + slave_name + "/" + srv_name + "/" + "get";
-    //ros::NodeHandle nh("~"); // for Nodes
     ros::NodeHandle nh = getPrivateNodeHandle();  // for Nodelets
 
     ros::ServiceClient client = nh.serviceClient<SrvType>(full_get_service);
 
     if (client.call(srv_obj))
     {
-      // ROS_INFO("Called /%s/%s/set", slave_name.c_str(), srv_name.c_str()); // for Nodes
       NODELET_INFO_STREAM("Called /" << slave_name.c_str() << "/" << srv_name.c_str()); // for Nodelets
     }
     else
     {
-      // ROS_ERROR("Failed to call service: %s", full_get_service.c_str()); // for Nodes
       NODELET_INFO_STREAM("Failed to call service: " << full_get_service.c_str()); // for Nodelets
     }
   }
