@@ -1,3 +1,4 @@
+name=P2_nano_left
 erase_table=65535
 Sensing__FTSensors__ADC_Raw_V=0
 clear_faults=0

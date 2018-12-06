@@ -69,8 +69,10 @@ namespace draco_nodelet
       //wait for bus transaction
       m_sync->awaitNextControl();
 
+      _checkContact();
       _copyData();
       _setCurrentPositionCmd();
+
       if (m_sync->printFaults()) {
 
       } else {
@@ -101,7 +103,11 @@ namespace draco_nodelet
           for (int i = 0; i < numJoint; ++i) {
               m_sync->changeMode("OFF", slaveNames[i]);
           }
-      } 
+      }
+  }
+
+  void DracoNodelet::_checkContact(){
+    // TODO with ati sensor
   }
 
   void DracoNodelet::_initialize() {
@@ -119,6 +125,8 @@ namespace draco_nodelet
     rotorInertia = Eigen::VectorXd::Zero(numJoint);
     rFootContact = false;
     lFootContact = false;
+    rFootATI = Eigen::VectorXd::Zero(6);
+    lFootATI = Eigen::VectorXd::Zero(6);
     jPosList.resize(numJoint);
     jVelList.resize(numJoint);
     jTrqList.resize(numJoint);
@@ -128,8 +136,8 @@ namespace draco_nodelet
     busCurrentList.resize(numJoint);
     imuAngVelList.resize(3);
     imuAccList.resize(3);
-    rFootATI.resize(6);
-    lFootATI.resize(6);
+    rFootATIList.resize(6);
+    lFootATIList.resize(6);
     rotorInertiaList.resize(numJoint);
     jPosCmd = Eigen::VectorXd::Zero(numJoint);
     jVelCmd = Eigen::VectorXd::Zero(numJoint);
@@ -231,21 +239,22 @@ namespace draco_nodelet
         lFootATIList[i] = new float(0.);
     }
 
-    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__N", sensilumNames[0], false);
+    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
+    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
+    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
     m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
     m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
     m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
 
-    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__N", sensilumNames[1], false);
+    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
+    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
+    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
     m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
     m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
     m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
 
   }
+
   void DracoNodelet::_parameterSetting() {
 
       Eigen::VectorXd jp_kp, jp_kd, t_kp, t_kd, current_limit, temperature_limit;
@@ -307,6 +316,13 @@ namespace draco_nodelet
       } else {
           // Do Nothing
       }
+
+      if(fabs(imuAcc[1]) < 0.00001){
+          if(mCount%1000 ==1) {
+              myUtils::pretty_print(imuAcc, std::cout, "imu_acc");
+              _turnOff();
+          }
+      }
   }
 
   void DracoNodelet::_checkCommand() {
@@ -361,12 +377,13 @@ namespace draco_nodelet
     sensor_data->imu_acc[0] = imuAcc[0];
     sensor_data->imu_acc[1] = -imuAcc[2];
     sensor_data->imu_acc[2] = imuAcc[1];
-    // !!TODO!! //
     sensor_data->rotor_inertia = rotorInertia;
     sensor_data->rfoot_contact = rFootContact;
     sensor_data->lfoot_contact = lFootContact;
+    // !!TODO : Organize Frame //
     sensor_data->rfoot_ati= rFootATI;
     sensor_data->lfoot_ati= lFootATI;
+
   }
 
   void DracoNodelet::_copyCommand() {

@@ -98,6 +98,7 @@ namespace draco_nodelet
     void _copyCommand();
     void _parameterSetting();
     void _InterfaceInitialize();
+    void _checkContact();
 
     int mCount;
   };

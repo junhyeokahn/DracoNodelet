@@ -120,5 +120,6 @@ Motor_drive__Vbus_min=12
 Control__Motor__Velocity__KD=0
 Control__Joint__Impedance__KP=0
 Limits__Joint__Min_pos_rad=-1.5708
-Motor__Therm_Res_1=0.5
+Motor__Therm_Res_1=1.0
 Motor__Coeff_Resistance_OhmspK=0.0039
+Motor_drive__Ripple_Current_A=1.0
