@@ -2,6 +2,7 @@
 #include "Configuration.h"
 #include "Utils/Utilities.hpp"
 #include <stdexcept>
+#include "Utils/Clock.hpp"
 
 using namespace apptronik_ros_utils;
 namespace draco_nodelet
@@ -69,6 +70,9 @@ namespace draco_nodelet
       //wait for bus transaction
       m_sync->awaitNextControl();
 
+      //Clock myClock;
+      //myClock.start();
+
       _checkContact();
       _copyData();
       _setCurrentPositionCmd();
@@ -80,6 +84,12 @@ namespace draco_nodelet
           jPosCmd = cmd->q; jVelCmd = cmd->qdot; jTrqCmd = cmd->jtrq;
       }
       _copyCommand();
+      //if (mCount % 500 == 0) {
+
+          //printf("==============================\n");
+          //printf("time : %f\n", myClock.stop());
+
+      //}
 
       m_sync->logger->captureLine();
 
@@ -108,6 +118,12 @@ namespace draco_nodelet
 
   void DracoNodelet::_checkContact(){
     // TODO with ati sensor
+    //if (rFootATI[5] < rfoot_contact_threshold_) {
+        //sensor_data->rfoot_contact = true;
+    //} else {
+        //sensor_data->rfoot_contact = false;
+    //}
+
   }
 
   void DracoNodelet::_initialize() {
@@ -239,19 +255,19 @@ namespace draco_nodelet
         lFootATIList[i] = new float(0.);
     }
 
-    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
 
-    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
 
   }
 
@@ -383,6 +399,14 @@ namespace draco_nodelet
     // !!TODO : Organize Frame //
     sensor_data->rfoot_ati= rFootATI;
     sensor_data->lfoot_ati= lFootATI;
+
+    //if (mCount % 500 == 0) {
+        //myUtils::pretty_print(rFootATI, std::cout, "rfoot ati");
+        //myUtils::pretty_print(lFootATI, std::cout, "lfoot ati");
+
+        //myUtils::pretty_print(sensor_data->rfoot_ati, std::cout, "2 rfoot ati");
+        //myUtils::pretty_print(sensor_data->lfoot_ati, std::cout, "2 lfoot ati");
+    //}
 
   }
 
