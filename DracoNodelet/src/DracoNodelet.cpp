@@ -229,7 +229,7 @@ namespace draco_nodelet
         busCurrentList[i] = new float(0.);
         m_sync->registerMISOPtr(busCurrentList[i], "energetics__bus_current__A", slaveNames[i], false);
         rotorInertiaList[i] = new float(0.);
-        //m_sync->registerMISOPtr(rotorInertiaList[i], "rotorINERTIA TODO", slaveNames[i]);
+        m_sync->registerMISOPtr(rotorInertiaList[i], "joint__reflected__motor__inertia__kgm2", slaveNames[i]);
 
         // Register Command
         jPosCmdList[i] = new float(0.);
@@ -273,7 +273,7 @@ namespace draco_nodelet
 
   void DracoNodelet::_parameterSetting() {
 
-      Eigen::VectorXd jp_kp, jp_kd, t_kp, t_kd, current_limit, temperature_limit;
+      Eigen::VectorXd jp_kp, jp_kd, t_kp, t_kd, current_limit, temperature_limit, rotor_inertia;
       Eigen::VectorXi en_auto_kd, en_dob;
       try {
           YAML::Node ll_config =
@@ -286,6 +286,7 @@ namespace draco_nodelet
           myUtils::readParameter(ll_config, "en_auto_kd", en_auto_kd);
           myUtils::readParameter(ll_config, "en_dob", en_dob);
           myUtils::readParameter(ll_config, "temperature_limit", temperature_limit);
+          myUtils::readParameter(ll_config, "rotor_inertia", rotor_inertia);
       } catch(std::runtime_error& e) {
           std::cout << "Error Reading Parameter [" << e.what() << "[" << std::endl;
       }
@@ -303,6 +304,8 @@ namespace draco_nodelet
           callSetService(slaveNames[i], "Control__Actuator__Effort__KD", srv_float);
           srv_float.request.set_data = current_limit[i];
           callSetService(slaveNames[i], "Limits__Motor__Current_Max_A", srv_float);
+          srv_float.request.set_data = rotor_inertia[i];
+          callSetService(slaveNames[i], "Actuator__Sprung_mass_kg", srv_float);
           srv_float.request.set_data = temperature_limit[i];
           callSetService(slaveNames[i], "Limits__Motor__Max_winding_temp_C", srv_float);
           srv_int.request.set_data = en_dob[i];
@@ -406,6 +409,7 @@ namespace draco_nodelet
 
         //myUtils::pretty_print(sensor_data->rfoot_ati, std::cout, "2 rfoot ati");
         //myUtils::pretty_print(sensor_data->lfoot_ati, std::cout, "2 lfoot ati");
+        //myUtils::pretty_print(sensor_data->rotor_inertia, std::cout, "rotor inertia");
     //}
 
   }
