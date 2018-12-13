@@ -255,19 +255,19 @@ namespace draco_nodelet
         lFootATIList[i] = new float(0.);
     }
 
-    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
-    m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
-    m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
+    //m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
 
-    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
-    m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
-    m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
+    //m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
 
   }
 
