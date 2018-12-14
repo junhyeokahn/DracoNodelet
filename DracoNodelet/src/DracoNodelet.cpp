@@ -77,6 +77,8 @@ namespace draco_nodelet
       _copyData();
       _setCurrentPositionCmd();
 
+     // TEST     
+      //interface->getCommand(sensor_data, cmd);
       if (m_sync->printFaults()) {
 
       } else {
