@@ -178,13 +178,15 @@ namespace draco_nodelet
     cmd = new DracoCommand();
     _InterfaceInitialize();
     try {
-        YAML::Node safety_cfg =
-            YAML::LoadFile(THIS_COM"Config/Draco/SAFETY.yaml");
-        myUtils::readParameter(safety_cfg, "max_temperature", maxTemperature);
-        myUtils::readParameter(safety_cfg, "max_position", maxPosition);
-        myUtils::readParameter(safety_cfg, "min_position", minPosition);
-        myUtils::readParameter(safety_cfg, "max_velocity", maxVelocity);
-        myUtils::readParameter(safety_cfg, "max_trq", maxTrq);
+        YAML::Node ll_config =
+            YAML::LoadFile(THIS_COM"Config/Draco/LOW_LEVEL_CONFIG.yaml");
+        YAML::Node safety_turn_off_cfg =
+            ll_config["safety_turn_off"];
+        myUtils::readParameter(safety_turn_off_cfg, "max_temperature", maxTemperature);
+        myUtils::readParameter(safety_turn_off_cfg, "max_position", maxPosition);
+        myUtils::readParameter(safety_turn_off_cfg, "min_position", minPosition);
+        myUtils::readParameter(safety_turn_off_cfg, "max_velocity", maxVelocity);
+        myUtils::readParameter(safety_turn_off_cfg, "max_trq", maxTrq);
     }catch(std::runtime_error& e) {
         std::cout << "Error Reading Parameter [" << e.what() << "]" << std::endl;
     }
@@ -280,15 +282,17 @@ namespace draco_nodelet
       try {
           YAML::Node ll_config =
               YAML::LoadFile(THIS_COM"Config/Draco/LOW_LEVEL_CONFIG.yaml");
-          myUtils::readParameter(ll_config, "jp_kp", jp_kp);
-          myUtils::readParameter(ll_config, "jp_kd", jp_kd);
-          myUtils::readParameter(ll_config, "t_kp", t_kp);
-          myUtils::readParameter(ll_config, "t_kd", t_kd);
-          myUtils::readParameter(ll_config, "current_limit", current_limit);
-          myUtils::readParameter(ll_config, "en_auto_kd", en_auto_kd);
-          myUtils::readParameter(ll_config, "en_dob", en_dob);
-          myUtils::readParameter(ll_config, "temperature_limit", temperature_limit);
-          myUtils::readParameter(ll_config, "rotor_inertia", rotor_inertia);
+          YAML::Node service_call_cfg =
+              ll_config["service_call"];
+          myUtils::readParameter(service_call_cfg, "jp_kp", jp_kp);
+          myUtils::readParameter(service_call_cfg, "jp_kd", jp_kd);
+          myUtils::readParameter(service_call_cfg, "t_kp", t_kp);
+          myUtils::readParameter(service_call_cfg, "t_kd", t_kd);
+          myUtils::readParameter(service_call_cfg, "current_limit", current_limit);
+          myUtils::readParameter(service_call_cfg, "en_auto_kd", en_auto_kd);
+          myUtils::readParameter(service_call_cfg, "en_dob", en_dob);
+          myUtils::readParameter(service_call_cfg, "temperature_limit", temperature_limit);
+          myUtils::readParameter(service_call_cfg, "rotor_inertia", rotor_inertia);
       } catch(std::runtime_error& e) {
           std::cout << "Error Reading Parameter [" << e.what() << "[" << std::endl;
       }
