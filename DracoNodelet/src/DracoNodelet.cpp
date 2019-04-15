@@ -53,7 +53,7 @@ namespace draco_nodelet
     //set up controller
     m_sync.reset(new apptronik_ros_utils::Synchronizer(true, "draco_nodelet"));
     m_sync->connect();
-    apptronik_ros_utils::enableRT(99, 2);
+    apptronik_ros_utils::enableRT(5, 2);
 
     // Initialize
     _initialize();
@@ -77,8 +77,8 @@ namespace draco_nodelet
       _copyData();
       _setCurrentPositionCmd();
 
-     // TEST     
-      //interface->getCommand(sensor_data, cmd);
+      // TEST
+      // interface->getCommand(sensor_data, cmd);
       if (m_sync->printFaults()) {
 
       } else {
@@ -145,6 +145,7 @@ namespace draco_nodelet
     lFootContact = false;
     rFootATI = Eigen::VectorXd::Zero(6);
     lFootATI = Eigen::VectorXd::Zero(6);
+
     jPosList.resize(numJoint);
     jVelList.resize(numJoint);
     jTrqList.resize(numJoint);
@@ -154,12 +155,14 @@ namespace draco_nodelet
     busCurrentList.resize(numJoint);
     imuAngVelList.resize(3);
     imuAccList.resize(3);
+    rotorInertiaList.resize(numJoint);
     rFootATIList.resize(6);
     lFootATIList.resize(6);
-    rotorInertiaList.resize(numJoint);
+
     jPosCmd = Eigen::VectorXd::Zero(numJoint);
     jVelCmd = Eigen::VectorXd::Zero(numJoint);
     jTrqCmd = Eigen::VectorXd::Zero(numJoint);
+
     jPosCmdList.resize(numJoint);
     jVelCmdList.resize(numJoint);
     jTrqCmdList.resize(numJoint);

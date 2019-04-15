@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/DracoNodeLet</url>
   <depend package="apptronik_ros"/>
-  <depend package="apptronik_ros_utils"/>
+  <depend package="rt_utils"/>
   <depend package="apptronik_srvs"/>
   <depend package="nodelet"/>
 

@@ -2,7 +2,7 @@
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
-#include <apptronik_ros_utils/synchronizer.hpp>
+#include <rt_utils/synchronizer.hpp>
 
 #include <cassert>
 
@@ -24,11 +24,8 @@ namespace draco_nodelet
     ~DracoNodelet();
 
   private:
-    uint64_t m_last_rt_lnx_time_ns, m_last_ec_bus_time_ns;
-    uint64_t m_rt_lnx_dt_ns,        m_ec_bus_dt_ns;
-
     ros::NodeHandle m_nh;
-    boost::shared_ptr<apptronik_ros_utils::Synchronizer> m_sync;
+    boost::shared_ptr<aptk::core::Synchronizer> m_sync;
     boost::shared_ptr<boost::thread> m_spin_thread;
 
     template <class SrvType>
