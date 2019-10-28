@@ -72,7 +72,6 @@ namespace draco_nodelet
     int numJoint;
     std::vector<std::string> slaveNames;
     std::string medullaName;
-    std::vector<std::string> sensilumNames;
 
     // Safety Factors
     Eigen::VectorXd maxTemperature;

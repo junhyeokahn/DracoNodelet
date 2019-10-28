@@ -1,10 +1,12 @@
 #include "DracoNodelet/DracoNodelet.hpp"
 #include "Configuration.h"
-#include "Utils/Utilities.hpp"
+#include "Utils/IO/IOUtilities.hpp"
+#include "Utils/Math/MathUtilities.hpp"
 #include <stdexcept>
-#include "Utils/Clock.hpp"
+#include "Utils/General/Clock.hpp"
+#include "ExternalSource/myYaml/include/myYaml/node/node.h"
 
-using namespace apptronik_ros_utils;
+using namespace aptk::core;
 namespace draco_nodelet
 {
   DracoNodelet::DracoNodelet() {
@@ -51,9 +53,9 @@ namespace draco_nodelet
   {
 
     //set up controller
-    m_sync.reset(new apptronik_ros_utils::Synchronizer(true, "draco_nodelet"));
+    m_sync.reset(new aptk::core::Synchronizer(true, "draco_nodelet"));
     m_sync->connect();
-    apptronik_ros_utils::enableRT(5, 2);
+    aptk::core::enableRT(5, 2);
 
     // Initialize
     _initialize();
@@ -70,30 +72,19 @@ namespace draco_nodelet
       //wait for bus transaction
       m_sync->awaitNextControl();
 
-      //Clock myClock;
-      //myClock.start();
-
       _checkContact();
       _copyData();
       _setCurrentPositionCmd();
 
-      // TEST
-      // interface->getCommand(sensor_data, cmd);
-      if (m_sync->printFaults()) {
+      if (m_sync->printIndicatedFaults()) {
 
       } else {
           interface->getCommand(sensor_data, cmd);
           jPosCmd = cmd->q; jVelCmd = cmd->qdot; jTrqCmd = cmd->jtrq;
       }
       _copyCommand();
-      //if (mCount % 500 == 0) {
 
-          //printf("==============================\n");
-          //printf("time : %f\n", myClock.stop());
-
-      //}
-
-      m_sync->logger->captureLine();
+      //m_sync->logger->captureLine();
 
       //indicate that we're done
       m_sync->finishControl();
@@ -167,13 +158,11 @@ namespace draco_nodelet
     jVelCmdList.resize(numJoint);
     jTrqCmdList.resize(numJoint);
 
-    medullaName = "Medulla_V2";
-    sensilumNames = {"P2_nano_left", "P2_nano_right"};
-    slaveNames.resize(numJoint+1+2);
+    medullaName = "Medulla_V3";
+    slaveNames.resize(numJoint+1);
     slaveNames = {"lHipYaw", "lHipRoll", "lHipPitch", "lKnee", "lAnkle",
                   "rHipYaw", "rHipRoll", "rHipPitch", "rKnee", "rAnkle",
-                  "Medulla_V2",
-                  "P2_nano_left", "P2_nano_right"};
+                  "Medulla_V3"};
     _parameterSetting();
 
     interface = new DracoInterface();
@@ -234,7 +223,7 @@ namespace draco_nodelet
         busVoltageList[i] = new float(0.);
         m_sync->registerMISOPtr(busVoltageList[i], "energetics__bus_voltage__V", slaveNames[i], false);
         busCurrentList[i] = new float(0.);
-        m_sync->registerMISOPtr(busCurrentList[i], "energetics__bus_current__A", slaveNames[i], false);
+        //m_sync->registerMISOPtr(busCurrentList[i], "energetics__bus_current__A", slaveNames[i], false);
         rotorInertiaList[i] = new float(0.);
         m_sync->registerMISOPtr(rotorInertiaList[i], "joint__reflected__motor__inertia__kgm2", slaveNames[i]);
 
@@ -262,19 +251,19 @@ namespace draco_nodelet
         lFootATIList[i] = new float(0.);
     }
 
-    //m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[0], false);
-    //m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[0], false);
-    //m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[0], false);
-    //m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", sensilumNames[0], false);
-    //m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", sensilumNames[0], false);
-    //m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", sensilumNames[0], false);
+    m_sync->registerMISOPtr(lFootATIList[0], "ati__Tx__filt__Nm", "lAnkle", false);
+    m_sync->registerMISOPtr(lFootATIList[1], "ati__Ty__filt__Nm", "lAnkle", false);
+    m_sync->registerMISOPtr(lFootATIList[2], "ati__Tz__filt__Nm", "lAnkle", false);
+    m_sync->registerMISOPtr(lFootATIList[3], "ati__Fx__filt__N", "lAnkle", false);
+    m_sync->registerMISOPtr(lFootATIList[4], "ati__Fy__filt__N", "lAnkle", false);
+    m_sync->registerMISOPtr(lFootATIList[5], "ati__Fz__filt__N", "lAnkle", false);
 
-    //m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", sensilumNames[1], false);
-    //m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", sensilumNames[1], false);
-    //m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", sensilumNames[1], false);
-    //m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", sensilumNames[1], false);
-    //m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", sensilumNames[1], false);
-    //m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", sensilumNames[1], false);
+    m_sync->registerMISOPtr(rFootATIList[0], "ati__Tx__filt__Nm", "rAnkle", false);
+    m_sync->registerMISOPtr(rFootATIList[1], "ati__Ty__filt__Nm", "rAnkle", false);
+    m_sync->registerMISOPtr(rFootATIList[2], "ati__Tz__filt__Nm", "rAnkle", false);
+    m_sync->registerMISOPtr(rFootATIList[3], "ati__Fx__filt__N", "rAnkle", false);
+    m_sync->registerMISOPtr(rFootATIList[4], "ati__Fy__filt__N", "rAnkle", false);
+    m_sync->registerMISOPtr(rFootATIList[5], "ati__Fz__filt__N", "rAnkle", false);
 
   }
 
@@ -325,21 +314,17 @@ namespace draco_nodelet
   }
 
   void DracoNodelet::_checkSensorData() {
-      if (!(myUtils::isInBoundingBox(minPosition, jPos, maxPosition))) {
+      if (!(myUtils::isInBoundingBox(jPos, minPosition, maxPosition))) {
           std::cout << "Measured Joint Position Hits the Limit"<< std::endl;
-          std::cout << jPos << std::endl;
           _turnOff();
-      } else if (!(myUtils::isInBoundingBox(Eigen::VectorXd::Constant(numJoint, -50.), temperature, maxTemperature))) {
+      } else if (!(myUtils::isInBoundingBox(temperature, Eigen::VectorXd::Constant(numJoint, -50.), maxTemperature))) {
           std::cout << "Temperature Hits the Limit" << std::endl;
-          std::cout << temperature << std::endl;
           _turnOff();
-      } else if (!(myUtils::isInBoundingBox(-maxVelocity, jVel, maxVelocity))) {
+      } else if (!(myUtils::isInBoundingBox(jVel, -maxVelocity, maxVelocity))) {
           std::cout << "Measured Joint Velocity Hits the Limit" << std::endl;
-          std::cout << jVel << std::endl;
           _turnOff();
-      } else if (!(myUtils::isInBoundingBox(-maxTrq, jTrq, maxTrq))) {
+      } else if (!(myUtils::isInBoundingBox(jTrq, -maxTrq, maxTrq))) {
           std::cout << "Measured Joint Torque Hits the Limit" << std::endl;
-          std::cout << jTrq << std::endl;
           _turnOff();
       } else {
           // Do Nothing
@@ -354,17 +339,14 @@ namespace draco_nodelet
   }
 
   void DracoNodelet::_checkCommand() {
-    if (!(myUtils::isInBoundingBox(minPosition, jPosCmd, maxPosition))) {
+    if (!(myUtils::isInBoundingBox(jPosCmd, minPosition, maxPosition))) {
         std::cout << "Commanded Joint Position Hits the Limit" << std::endl;
-        std::cout << jPosCmd << std::endl;
         _turnOff();
-    } else if (!(myUtils::isInBoundingBox(-maxVelocity, jVelCmd, maxVelocity))) {
+    } else if (!(myUtils::isInBoundingBox(jVelCmd, -maxVelocity, maxVelocity))) {
         std::cout << "Commanded Joint Velocity Hits the Limit" << std::endl;
-        std::cout << jVelCmd << std::endl;
         _turnOff();
-    } else if (!(myUtils::isInBoundingBox(-maxTrq, jTrqCmd, maxTrq))) {
+    } else if (!(myUtils::isInBoundingBox(jTrqCmd, -maxTrq, maxTrq))) {
         std::cout << "Commanded Joint Torque Hits the Limit" << std::endl;
-        std::cout << jTrqCmd << std::endl;
         _turnOff();
     }
   }
@@ -396,31 +378,14 @@ namespace draco_nodelet
     sensor_data->bus_voltage = busVoltage;
     sensor_data->temperature = temperature;
     sensor_data->bus_current = busCurrent;
-    //sensor_data->imu_ang_vel = imuAngVel;
-    //sensor_data->imu_acc = imuAcc;
-    // !!TODO!! //
-    sensor_data->imu_ang_vel[0] = imuAngVel[0];
-    sensor_data->imu_ang_vel[1] = -imuAngVel[2];
-    sensor_data->imu_ang_vel[2] = imuAngVel[1];
-    sensor_data->imu_acc[0] = imuAcc[0];
-    sensor_data->imu_acc[1] = -imuAcc[2];
-    sensor_data->imu_acc[2] = imuAcc[1];
+    sensor_data->imu_ang_vel = imuAngVel;
+    sensor_data->imu_acc = imuAcc;
     sensor_data->rotor_inertia = rotorInertia;
     sensor_data->rfoot_contact = rFootContact;
     sensor_data->lfoot_contact = lFootContact;
     // !!TODO : Organize Frame //
     sensor_data->rfoot_ati= rFootATI;
     sensor_data->lfoot_ati= lFootATI;
-
-    //if (mCount % 500 == 0) {
-        //myUtils::pretty_print(rFootATI, std::cout, "rfoot ati");
-        //myUtils::pretty_print(lFootATI, std::cout, "lfoot ati");
-
-        //myUtils::pretty_print(sensor_data->rfoot_ati, std::cout, "2 rfoot ati");
-        //myUtils::pretty_print(sensor_data->lfoot_ati, std::cout, "2 lfoot ati");
-        //myUtils::pretty_print(sensor_data->rotor_inertia, std::cout, "rotor inertia");
-    //}
-
   }
 
   void DracoNodelet::_copyCommand() {

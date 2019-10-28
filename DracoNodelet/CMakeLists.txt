@@ -17,5 +17,5 @@ include_directories(${PNC_INCLUDE_DIRS})
 
 rosbuild_add_library(DracoNodelet src/DracoNodelet.cpp)
 target_link_libraries(DracoNodelet rt
-                                   apptronik_ros_utils
+                                   rt_utils
                                    ${PNC_LIBRARIES})
