@@ -32,6 +32,7 @@ namespace draco_nodelet
     for (int i = 0; i < 3; ++i) {
         delete imuAccList[i];
         delete imuAngVelList[i];
+        delete imuMagList[i];
     }
     for (int i = 0; i < 6; ++i) {
         delete rFootATIList[i];
@@ -131,6 +132,7 @@ namespace draco_nodelet
     busCurrent = Eigen::VectorXd::Zero(numJoint);
     imuAngVel = Eigen::VectorXd::Zero(3);
     imuAcc = Eigen::VectorXd::Zero(3);
+    imuMag = Eigen::VectorXd::Zero(3);
     rotorInertia = Eigen::VectorXd::Zero(numJoint);
     rFootContact = false;
     lFootContact = false;
@@ -146,6 +148,7 @@ namespace draco_nodelet
     busCurrentList.resize(numJoint);
     imuAngVelList.resize(3);
     imuAccList.resize(3);
+    imuMagList.resize(3);
     rotorInertiaList.resize(numJoint);
     rFootATIList.resize(6);
     lFootATIList.resize(6);
@@ -187,6 +190,7 @@ namespace draco_nodelet
   void DracoNodelet::_InterfaceInitialize() {
       sensor_data->imu_ang_vel = Eigen::VectorXd::Zero(3);
       sensor_data->imu_acc = Eigen::VectorXd::Zero(3);
+      sensor_data->imu_mag = Eigen::VectorXd::Zero(3);
       sensor_data->q = Eigen::VectorXd::Zero(10);
       sensor_data->qdot = Eigen::VectorXd::Zero(10);
       sensor_data->jtrq = Eigen::VectorXd::Zero(10);
@@ -238,6 +242,7 @@ namespace draco_nodelet
     for (int i = 0; i < 3; ++i) {
         imuAngVelList[i] = new float(0.);
         imuAccList[i] = new float(0.);
+        imuMagList[i] = new float(0.);
     }
     m_sync->registerMISOPtr(imuAngVelList[0], "gyro__x__angularRate__radps", medullaName, false);
     m_sync->registerMISOPtr(imuAngVelList[1], "gyro__y__angularRate__radps", medullaName, false);
@@ -245,6 +250,10 @@ namespace draco_nodelet
     m_sync->registerMISOPtr(imuAccList[0], "accelerometer__x__acceleration__mps2", medullaName, false);
     m_sync->registerMISOPtr(imuAccList[1], "accelerometer__y__acceleration__mps2", medullaName, false);
     m_sync->registerMISOPtr(imuAccList[2], "accelerometer__z__acceleration__mps2", medullaName, false);
+    // TODO: Name
+    m_sync->registerMISOPtr(imuMagList[0], "magnetometer__x__field__gauss", medullaName, false);
+    m_sync->registerMISOPtr(imuMagList[1], "magnetometer__y__field__gauss", medullaName, false);
+    m_sync->registerMISOPtr(imuMagList[2], "magnetometer__z__field__gauss", medullaName, false);
 
     for (int i = 0; i < 6; ++i) {
         rFootATIList[i] = new float(0.);
@@ -365,6 +374,7 @@ namespace draco_nodelet
     for (int i = 0; i < 3; ++i) {
         imuAngVel[i] = static_cast<double> (*(imuAngVelList[i]));
         imuAcc[i] = static_cast<double> (*(imuAccList[i]));
+        imuMag[i] = static_cast<double> (*(imuMagList[i]));
     }
     for (int i = 0; i < 6; ++i) {
         rFootATI[i] = static_cast<double> (*(rFootATIList[i]));
@@ -380,6 +390,7 @@ namespace draco_nodelet
     sensor_data->bus_current = busCurrent;
     sensor_data->imu_ang_vel = imuAngVel;
     sensor_data->imu_acc = imuAcc;
+    sensor_data->imu_mag = imuMag;
     sensor_data->rotor_inertia = rotorInertia;
     sensor_data->rfoot_contact = rFootContact;
     sensor_data->lfoot_contact = lFootContact;

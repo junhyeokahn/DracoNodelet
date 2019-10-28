@@ -43,6 +43,7 @@ namespace draco_nodelet
     Eigen::VectorXd busCurrent;
     Eigen::VectorXd imuAngVel; // x, y, z
     Eigen::VectorXd imuAcc;  // x, y, z
+    Eigen::VectorXd imuMag;  // x, y, z
     Eigen::VectorXd rotorInertia;
     bool rFootContact;
     bool lFootContact;
@@ -57,6 +58,7 @@ namespace draco_nodelet
     std::vector<float*> busCurrentList;
     std::vector<float*> imuAngVelList;
     std::vector<float*> imuAccList;
+    std::vector<float*> imuMagList;
     std::vector<float*> rotorInertiaList;
     std::vector<float*> rFootATIList; // Tx, Ty, Tz, Fx, Fy, Fz
     std::vector<float*> lFootATIList; // Tx, Ty, Tz, Fx, Fy, Fz
