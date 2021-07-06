@@ -1,0 +1,9 @@
+<launch>
+  <arg name="enforced_loop_rate" default="500"/>
+
+  <param name="/synapse/enforced_loop_rate" value="$(arg enforced_loop_rate)"/>
+  <include file="$(find synapse)/launch/synapse.launch"/>
+  <node pkg="nodelet" type="nodelet" name="ActuatorNodelet" args="load actuator_nodelet/ActuatorNodelet synapse_group --no-bond" output="screen">
+  </node>
+
+</launch>

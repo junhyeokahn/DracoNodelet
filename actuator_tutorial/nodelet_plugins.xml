@@ -1,0 +1,7 @@
+<library path="lib/libactuator_tutorial">
+  <class name="actuator_nodelet/ActuatorNodelet" type="actuator_nodelet::ActuatorNodelet" base_class_type="nodelet::Nodelet">
+  <description>
+    actuator nodelet
+  </description>
+  </class>
+</library>
